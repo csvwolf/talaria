@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 internal sealed class DualPads : IDisposable {
  readonly SteamlessCadence[] cadence={new SteamlessCadence(),new SteamlessCadence()};
  readonly ScrollFilter[] wheelFilters={new ScrollFilter(),new ScrollFilter()};
  readonly PadBook book; readonly MappingEngine[] maps=new MappingEngine[2];readonly bool[] down=new bool[2],touch=new bool[2],seed=new bool[2];readonly int[] px=new int[2],py=new int[2];readonly double[] distance=new double[2];readonly long[] last=new long[]{-1000,-1000};bool sentLeft,sentRight;readonly Stopwatch clock=Stopwatch.StartNew();LiveFeedback[] feedback=new LiveFeedback[2];bool feedbackFailed;
- internal DualPads(PadBook b){book=b;for(int i=0;i<2;i++){var p=Profile(i);maps[i]=new MappingEngine(new DesktopSettings{DragScale=p.DragScale,Speed=p.Speed,SmoothMs=p.Smooth,Friction=p.Friction,Inertia=p.Inertia,PressureClick=true,HardwarePadClick=true,PressThreshold=p.Press,ReleaseThreshold=p.Release,ClickStableMs=p.StableMs,LeftScroll=false});}}
+ internal DualPads(PadBook b){book=b;for(int i=0;i<2;i++){var p=Profile(i);maps[i]=new MappingEngine(new DesktopSettings{DragThresholdPx=p.DragThresholdPx,DragScale=p.DragScale,Speed=p.Speed,SmoothMs=p.Smooth,Friction=p.Friction,Inertia=p.Inertia,PressureClick=true,HardwarePadClick=true,PressThreshold=p.Press,ReleaseThreshold=p.Release,ClickStableMs=p.StableMs,LeftScroll=false});}}
  internal bool Pressed(int i){return down[i];}
  PadProfile Profile(int i){return i==0?book.Left:book.Right;}
  internal List<string> Reset(){for(int i=0;i<2;i++){maps[i].Reset();cadence[i].Reset();down[i]=touch[i]=seed[i]=false;wheelFilters[i].Reset();distance[i]=0;last[i]=-1000;if(feedback[i]!=null)feedback[i].Clear();}var a=new List<string>();if(sentLeft)a.Add("LeftUp");if(sentRight)a.Add("RightUp");sentLeft=sentRight=false;return a;}

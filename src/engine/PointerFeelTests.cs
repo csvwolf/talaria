@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 internal static class PointerFeelTests {
  static byte[] Report(int y,bool touched){var d=new byte[48];d[0]=0x45;Array.Copy(BitConverter.GetBytes(touched?0x02000000u:0u),0,d,2,4);Array.Copy(BitConverter.GetBytes((short)y),0,d,20,2);return d;}
@@ -17,7 +17,25 @@ internal static class PointerFeelTests {
   var copy=new System.Web.Script.Serialization.JavaScriptSerializer().Deserialize<PadBook>(book.Json());
   if(!copy.Left.ReverseScroll || copy.Right.ReverseScroll || copy.Left.ScrollReversalPercent!=1.2)throw new Exception("Scroll profile isolation lost");
  }
- internal static void Run(){HardwareClickTest();ScrollNoiseTest();var b=new PadBook();b.Left.FineScroll=true;b.Left.ScrollUnits=6000;using(var d=new DualPads(b)){d.Step(Report(0,true),IntPtr.Zero,IntPtr.Zero,false);int sum=0;for(int i=1;i<=100;i++)sum+=Wheel(d.Step(Report(i*10,true),IntPtr.Zero,IntPtr.Zero,false));if(sum<19 || sum>20)throw new Exception("Fine scrolling lost fractional movement");if(Wheel(d.Step(Report(500,true),IntPtr.Zero,IntPtr.Zero,false))>=0)throw new Exception("Scroll reversal failed");d.Step(Report(0,false),IntPtr.Zero,IntPtr.Zero,false);if(Wheel(d.Step(Report(25000,true),IntPtr.Zero,IntPtr.Zero,false))!=0)throw new Exception("Retouch scroll jump");}
+ static byte[] Pointer(int x,int y,bool down){var r=Report(0,false);Array.Copy(BitConverter.GetBytes(down?0x600000u:0x200000u),0,r,2,4);Array.Copy(BitConverter.GetBytes((short)x),0,r,24,2);Array.Copy(BitConverter.GetBytes((short)y),0,r,26,2);return r;}
+ static void ClickToleranceTest(){
+  var m=new MappingEngine(new DesktopSettings{DragThresholdPx=6,Speed=.01,SmoothMs=0,Inertia=false,ClickStableMs=0,DragScale=1});
+  m.StepAt(Pointer(0,0,false),1);
+  if(!m.StepAt(Pointer(0,0,true),1.01).Contains("LeftDown"))throw new Exception("Press delayed");
+  for(int i=0;i<20;i++)if(m.StepAt(Pointer(i%2==0?400:-400,200,true),1.02+i*.002).Exists(s=>s.StartsWith("Move")))throw new Exception("Shake became drag");
+  if(!m.StepAt(Pointer(0,0,false),1.07).Contains("LeftUp"))throw new Exception("Release delayed");
+  if(m.StepAt(Pointer(300,200,false),1.08).Exists(s=>s.StartsWith("Move")))throw new Exception("Release drift moved double click");
+  if(!m.StepAt(Pointer(300,200,true),1.09).Contains("LeftDown"))throw new Exception("Second click delayed");
+  if(m.StepAt(Pointer(700,200,true),1.10).Exists(s=>s.StartsWith("Move")))throw new Exception("Second click dragged");
+  if(!m.StepAt(Pointer(1100,200,true),1.11).Contains("Move dx=2 dy=0"))throw new Exception("Intentional drag threshold or backlog wrong");
+  if(!m.StepAt(Pointer(1200,200,true),1.12).Contains("Move dx=1 dy=0"))throw new Exception("Drag did not stay latched");
+  m.StepAt(Pointer(1200,200,false),1.13);
+  if(!m.StepAt(Pointer(1300,200,false),1.24).Contains("Move dx=1 dy=0"))throw new Exception("Normal movement delayed");
+  m.Reset();m.StepAt(Pointer(0,0,false),2);if(!m.StepAt(Pointer(100,0,false),2.01).Contains("Move dx=1 dy=0"))throw new Exception("Reset retained gate");
+  var b=new PadBook();b.Left.DragThresholdPx=15;var c=new System.Web.Script.Serialization.JavaScriptSerializer().Deserialize<PadBook>(b.Json());if(c.Left.DragThresholdPx!=15 || c.Right.DragThresholdPx!=6)throw new Exception("Tolerance roundtrip");
+  var cfg=new DesktopSettings{Global=false};cfg.ProfileTargets.Add(@"C:\Games\test.exe");if(cfg.Allows(@"C:\Games\test.exe",new IntPtr(1)))throw new Exception("App profile bypassed empty whitelist");
+ }
+ internal static void Run(){ClickToleranceTest();HardwareClickTest();ScrollNoiseTest();var b=new PadBook();b.Left.FineScroll=true;b.Left.ScrollUnits=6000;using(var d=new DualPads(b)){d.Step(Report(0,true),IntPtr.Zero,IntPtr.Zero,false);int sum=0;for(int i=1;i<=100;i++)sum+=Wheel(d.Step(Report(i*10,true),IntPtr.Zero,IntPtr.Zero,false));if(sum<19 || sum>20)throw new Exception("Fine scrolling lost fractional movement");if(Wheel(d.Step(Report(500,true),IntPtr.Zero,IntPtr.Zero,false))>=0)throw new Exception("Scroll reversal failed");d.Step(Report(0,false),IntPtr.Zero,IntPtr.Zero,false);if(Wheel(d.Step(Report(25000,true),IntPtr.Zero,IntPtr.Zero,false))!=0)throw new Exception("Retouch scroll jump");}
  b.Left.FineScroll=false;using(var d=new DualPads(b)){d.Step(Report(0,true),IntPtr.Zero,IntPtr.Zero,false);if(Wheel(d.Step(Report(1000,true),IntPtr.Zero,IntPtr.Zero,false))!=0)throw new Exception("Legacy scrolling changed");}
  var m=new MappingEngine(new DesktopSettings{Speed=.01125,SmoothMs=0,Inertia=false,DragScale=1,ClickStableMs=0});var r=Report(0,false);Array.Copy(BitConverter.GetBytes(0x200000u),0,r,2,4);m.StepAt(r,1);Array.Copy(BitConverter.GetBytes((short)800),0,r,24,2);if(!m.StepAt(r,1.01).Contains("Move dx=9 dy=0"))throw new Exception("Reference sensitivity mismatch");Array.Clear(r,2,4);if(m.StepAt(r,1.02).Exists(x=>x.StartsWith("Move")))throw new Exception("Direct pointer coasted after lift");Probe.Say("POINTER FEEL PASS: fine scroll, reversal, retouch, legacy scroll, direct sensitivity and lift.");}
 }

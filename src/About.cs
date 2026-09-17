@@ -34,6 +34,7 @@ internal sealed partial class PadHop
   AboutButton(links,"GitHub ↗",delegate{OpenExternal("https://github.com/csvwolf/talaria");});
   AboutButton(links,L.T("作者博客 ↗"),delegate{OpenExternal("https://www.codesky.me/");});
   AboutButton(links,L.T("微博 ↗"),delegate{OpenExternal("https://www.weibo.com/dreamit");});
+  BuildStartup(live);
   var updates=AboutCard(L.T("软件更新"));
   updateStatus=new TextBlock{Text=L.T("尚未检查更新。更新来源：GitHub 官方项目 Release。"),Margin=new Thickness(0,0,0,12)};updates.Children.Add(updateStatus);
   var actions=new WrapPanel();updates.Children.Add(actions);

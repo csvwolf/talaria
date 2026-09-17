@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -6,6 +6,7 @@ using System.Windows.Media;
 internal sealed partial class PadHop {
  void Explain(TextBlock label,string text){string help=ParameterHelp(text);if(help==null)return;help=help.Replace("。", "。\n").Trim();label.Inlines.Add(new Run("  ?"){Foreground=new SolidColorBrush(Color.FromRgb(97,205,250)),FontWeight=FontWeights.Bold});label.ToolTip=new ToolTip{Background=new SolidColorBrush(Color.FromRgb(28,43,56)),Foreground=Brushes.White,BorderBrush=new SolidColorBrush(Color.FromRgb(64,93,114)),Padding=new Thickness(12),Content=new TextBlock{Text=help,MaxWidth=300,TextWrapping=TextWrapping.Wrap,LineHeight=22,Foreground=Brushes.White}};ToolTipService.SetInitialShowDelay(label,180);ToolTipService.SetShowDuration(label,30000);System.Windows.Automation.AutomationProperties.SetHelpText(label,help);}
  string ParameterHelp(string label){
+ if(label.StartsWith(L.T("拖拽起步距离")))return L.T("按住触摸板后，移动超过此距离才开始拖拽。调大更能容忍双击时的手抖，调小更快开始拖拽；0 关闭。默认 6，按鼠标速度换算后的相对移动量计算，系统鼠标加速前的单位。松开后的 100 ms 也过滤同范围晃动，不延迟下一次按下。普通滑动不受影响。");
  if(label.StartsWith(L.T("换向缓冲")))return L.T("换向时需要越过的小范围，按触摸板完整纵向行程的百分比计算。调大可避免手抖反滚，但主动换向需要多滑一点。0 关闭换向缓冲；不改变持续同向滚动的速度。默认 0.4%。");
  if(label==L.T("滚动方向"))return L.T("滚轮方向：手指上滑，页面向上滚。自然方向：手指上滑，内容跟着手指向上移动，页面向下滚。左右触摸板独立保存。");
  if(label.StartsWith(L.T("触摸缓冲")))return L.T("刚接触触摸板后，暂缓滑动反馈多久。调大更能避开按压准备动作，调小滑动反馈来得更快。只影响 Steamless 触觉规则，不延迟鼠标移动。");

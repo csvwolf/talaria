@@ -1,5 +1,22 @@
 ﻿# Changelog
 
+## 0.2.9
+
+- Add opt-in current-user Windows sign-in startup in About, disabled by default. Starts in tray without enabling takeover; duplicate startup does not raise the existing window.
+- Uninstall removes the matching current-user startup entry.
+
+## 0.2.8
+
+- Distinguish built-in presets from personal profiles with persisted origin.
+- Reset built-in defaults into the editor; saved and applied snapshots stay unchanged until explicitly saved/applied.
+- Preserve all legacy profiles as personal entries because older versions did not track their origin.
+
+## 0.2.7
+
+- Add per-pad drag-start tolerance to prevent click jitter from turning double clicks into drags; release settling does not delay button edges.
+- Apply saved application rules to active takeover immediately; mode switches save and apply automatically. Empty whitelist stays independent of game profiles.
+- Preserve existing pointer speed, haptic recordings and custom settings.
+
 ## 0.2.6
 
 - Correct physical Menu/View input bit routing.

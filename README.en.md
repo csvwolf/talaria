@@ -17,7 +17,7 @@
 
 A Windows input utility for Steam Controller 2: global and per-app profiles, independent trackpads and haptics, keyboard/mouse bindings, Windows shortcuts, macros, the system on-screen keyboard, and optional virtual Xbox controller output. This is an independent project, not affiliated with Valve.
 
-**0.2.6 experimental release: Bluetooth SC2 is the current supported connection.** USB/receiver connections and Steam Deck/Moonlight forwarded controllers are not currently supported. Protocol and firmware differences need hardware testing; automated tests cannot establish compatibility with every game.
+**0.2.9 experimental release: Bluetooth SC2 is the current supported connection.** USB/receiver connections and Steam Deck/Moonlight forwarded controllers are not currently supported. Protocol and firmware differences need hardware testing; automated tests cannot establish compatibility with every game.
 
 ## Installation
 

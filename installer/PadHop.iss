@@ -261,7 +261,12 @@ begin
 end;
 
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+var StartupValue: String;
 begin
+  if CurUninstallStep = usPostUninstall then
+    if RegQueryStringValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Run', 'Talaria', StartupValue) then
+      if CompareText(StartupValue, '"' + ExpandConstant('{app}\PadHop.exe') + '" --autostart') = 0 then
+        RegDeleteValue(HKCU, 'Software\Microsoft\Windows\CurrentVersion\Run', 'Talaria');
   if (CurUninstallStep = usUninstall) and FileExists(ExpandConstant('{app}\.local-signing\state.json')) then
     if not RunLocalSigning('RemoveTrust', False) then
       RaiseException(Tr('本机签名信任未能移除。请先运行 Local-Signing.ps1 -Action RemoveTrust，再重试卸载。', 'Local certificate trust could not be removed. Run Local-Signing.ps1 -Action RemoveTrust, then retry uninstalling.'));

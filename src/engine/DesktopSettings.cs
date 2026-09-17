@@ -9,6 +9,7 @@ using System.Text;
 internal sealed class DesktopSettings
 {
     internal string AppProfiles;internal readonly List<string> ProfileTargets=new List<string>();internal string PadProfiles; internal string DevicePath="";
+    internal double DragThresholdPx=0;
     internal double Speed = 0.02, SmoothMs = 12, Friction = 8, ScrollUnits = 2000;
     internal bool Inertia = true, Global, SteamDesktopMuted;
     internal bool PressureClick;internal bool HardwarePadClick=false;

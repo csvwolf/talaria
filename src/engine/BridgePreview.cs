@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -135,6 +135,7 @@ internal sealed class MappingEngine
     readonly DesktopSettings cfg;
     readonly Stopwatch time = Stopwatch.StartNew();
     double previousTime, vx, vy, stableUntil;
+    double pressTravelX,pressTravelY,settleUntil;bool dragStarted;
     bool seeded, leftTouch, rightTouch, leftDown, rightDown, leftBlocked, rightBlocked;
     int leftY, rightX, rightY;
     double residualX, residualY, wheel;
@@ -146,6 +147,7 @@ internal sealed class MappingEngine
         if(leftDown) actions.Add("LeftUp"); if(rightDown) actions.Add("RightUp");
         seeded=leftTouch=rightTouch=leftDown=rightDown=leftBlocked=rightBlocked=false;
         residualX=residualY=wheel=vx=vy=previousTime=stableUntil=0;
+        pressTravelX=pressTravelY=settleUntil=0;dragStarted=false;
         return actions;
     }
     internal List<string> Step(byte[] d) { return StepAt(d,time.Elapsed.TotalSeconds); }
@@ -166,13 +168,20 @@ internal sealed class MappingEngine
         bool wasDown=leftDown;
         Trigger(click,press,release,ref leftBlocked,ref leftDown,"Left",actions);
         Trigger(trigger,12000,6000,ref rightBlocked,ref rightDown,"Right",actions);
-        if(wasDown!=leftDown) { stableUntil=now+cfg.ClickStableMs/1000; ClearMotion(); }
+        if(wasDown!=leftDown) { stableUntil=now+cfg.ClickStableMs/1000; ClearMotion(); pressTravelX=pressTravelY=0;dragStarted=false;settleUntil=leftDown?0:now+.1; }
         if(rt && !rightTouch) ClearMotion(); // Touching a spinning trackball brakes it without a jump.
         if(seeded && rt && rightTouch)
         {
             if(now<stableUntil || wasDown!=leftDown) ClearMotion();
             else {
                 double dx=(rx-rightX)*cfg.Speed, dy=-(ry-rightY)*cfg.Speed;
+                // Gate net displacement, not path length: repeated tiny shakes must not start a drag.
+                if(cfg.DragThresholdPx>0 && !dragStarted && (leftDown || now<settleUntil)){
+                    pressTravelX+=dx;pressTravelY+=dy;
+                    double travel=Math.Max(Math.Abs(pressTravelX),Math.Abs(pressTravelY));
+                    if(travel<=cfg.DragThresholdPx){dx=dy=0;ClearMotion();}
+                    else {double keep=(travel-cfg.DragThresholdPx)/travel;dx=pressTravelX*keep;dy=pressTravelY*keep;dragStarted=true;pressTravelX=pressTravelY=0;}
+                }
                 double gain=1+cfg.Acceleration*Math.Min(1,Math.Sqrt(dx*dx+dy*dy)/dt/1500);
                 double scale=leftDown?cfg.DragScale:1;
                 double alpha=cfg.SmoothMs==0?1:1-Math.Exp(-dt/(cfg.SmoothMs/1000));
