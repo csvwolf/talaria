@@ -81,6 +81,7 @@ Source: "{#Root}\README.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#Root}\README.en.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#Root}\licenses\*"; DestDir: "{app}\licenses"; Flags: ignoreversion
 Source: "{#Root}\docs\*"; DestDir: "{app}\docs"; Flags: ignoreversion
+Source: "{#Root}\scripts\Install-CaptureTools.ps1"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#Root}\scripts\configure-capture.ps1"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]

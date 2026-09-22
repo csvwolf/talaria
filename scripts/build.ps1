@@ -6,6 +6,7 @@ $framework=Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319'
 $csc=Join-Path $framework 'csc.exe'
 New-Item -ItemType Directory -Force $bin,(Join-Path $bin 'source'),(Join-Path $bin 'assets'),(Join-Path $bin 'capture') | Out-Null
 & (Join-Path $PSScriptRoot 'restore.ps1')
+Copy-Item (Join-Path $PSScriptRoot 'Install-CaptureTools.ps1') $bin -Force
 Copy-Item (Join-Path $root '.deps\ViGEmClient.dll') $bin -Force
 Copy-Item (Join-Path $root 'src\Main.xaml') (Join-Path $bin 'source') -Force
 $version=(Get-Content (Join-Path $root 'VERSION') -Raw).Trim()

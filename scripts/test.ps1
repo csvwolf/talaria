@@ -12,3 +12,6 @@ if($LASTEXITCODE){throw 'Analysis tests failed'}
 'PASS: PowerShell syntax and Python capture tests.'
 
 & (Join-Path $root 'scripts\Local-Signing.ps1') -Action SelfTest
+
+& powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot "Install-CaptureTools.ps1") -SelfTest
+if($LASTEXITCODE){throw "Capture dependency tests failed"}

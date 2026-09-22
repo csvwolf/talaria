@@ -15,3 +15,5 @@
 常规日志新增 INPUT_SUMMARY：仅本程序输出事件计数、虚拟手柄连接及原生键鼠接管状态，不含具体按键、输入文字、坐标或应用路径。排查用临时低级输入监测程序未包含在发行包中。
 
 Device refresh writes `devices-diagnostic.log`: product/display names (common hexadecimal IDs redacted), HID VID/PID/Usage, filter reasons, unreadable count, OS and app version. No device paths, input reports or addresses are intentionally included. Custom device names can still contain personal text; review this file before sharing. Do not send the entire logs folder, which can contain configuration snapshots or capture files.
+
+录制组件安装由用户点击触发，会连接 Python.org 和 download.microsoft.com 下载固定版本并校验哈希。安装日志记录步骤、版本、校验结果、取消和错误码，不记录完整个人路径或输入内容；微软组件可能需要管理员确认。不会上传日志。

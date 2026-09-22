@@ -2,6 +2,8 @@
 
 ## 0.2.15
 
+- Add an in-app recording component installer: reuse existing tools, verify official downloads, configure paths automatically and retain sanitized setup logs for troubleshooting.
+
 - Enable update notifications by default with a persistent opt-out; downloads and installation remain manual.
 
 - Stabilize profile serialization so JSON property order cannot produce false unsaved/applied differences; preserve macro step order.

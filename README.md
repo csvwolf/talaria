@@ -45,7 +45,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-installer.ps1
 
 构建使用系统 .NET Framework C# 编译器，固定 NuGet 依赖版本并校验原生 DLL SHA-256。首次恢复需要联网；运行软件没有遥测；更新检查默认开启，可在「关于」取消；只检查并提示，下载和安装分别由用户点击。产物在 `bin/`，发布安装程序在 `dist/install.exe`。
 
-可选录制依赖、敏感日志与恢复流程见 [触觉录制](docs/capture.md)。数据说明见 [隐私](docs/privacy.md)，发布限制见 [发布与验证](docs/release.md)，签名准备状态见 [Code signing policy](docs/signing.md)。
+首次录制可在录制区域点击「安装录制组件」，自动下载、校验和配置依赖；失败时可直接打开安装日志。可选录制依赖、敏感日志与恢复流程见 [触觉录制](docs/capture.md)。数据说明见 [隐私](docs/privacy.md)，发布限制见 [发布与验证](docs/release.md)，签名准备状态见 [Code signing policy](docs/signing.md)。
 
 ## 许可与致谢
 

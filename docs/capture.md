@@ -2,13 +2,13 @@
 
 普通映射与预设不需要 Python。完整蓝牙录制需要 Python 3.9+、Windows WPR 和微软 BTETLParse.exe。请从微软 Bluetooth Test Platform 的官方来源取得分析工具；遵守其许可，勿上传到本仓库。
 
-在安装目录执行：
+在「手柄输入设置」展开录制区域，点击「安装录制组件」。程序会复用已配置且验证通过的组件；缺少时从官方来源下载并校验固定 SHA-256：
 
-```powershell
-.\configure-capture.ps1 -Python 'C:\Tools\Python\python.exe' -Parser 'C:\Tools\BTP\BTETLParse.exe'
-```
+- Python 3.12.10 嵌入式运行环境：安装到当前用户的 `Talaria/capture-tools`，不修改 PATH，也不影响其他 Python。
+- Microsoft Bluetooth Test Platform 1.14.0：验证 Microsoft 签名后启动官方安装器，可能出现管理员确认；不会运行蓝牙测试或机器配置脚本。
+- WPR 使用 Windows 自带组件。缺失时报告错误，不修改系统组件。
 
-脚本验证解析器 Microsoft 签名，工具路径仅写入用户数据目录。来源链接与 WPR 配置版本见源码 `tools/capture/PROVENANCE.txt`。
+安装完成自动保存工具路径；取消或失败可重新点击重试。「打开安装日志」提供步骤、版本、校验结果及错误码，日志位于 `%LOCALAPPDATA%/Talaria/logs/capture-setup-*.log`，不记录完整个人路径。原始安装包只下载到本机，不放入 Release。自定义安装仍可用 `configure-capture.ps1 -Python <python.exe> -Parser <BTETLParse.exe>`。
 
 录制时按界面的准备、静止、慢滑、快滑、按压步骤操作。蓝牙诊断需要一次管理员授权；临时修改 BTHPORT 的三个诊断值，并在结束时恢复。不要同时运行其他蓝牙诊断工具。捕获可能包含其他设备内容，见隐私说明。
 

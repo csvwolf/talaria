@@ -52,7 +52,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-installer.ps1
 
 The build uses the system .NET Framework C# compiler, pinned NuGet dependencies, and SHA-256 checks for native DLLs. Initial dependency restoration requires internet access. Application binaries are in `bin/`; the installer is `dist/install.exe`. English translations are maintained in `languages/en.json`; the build embeds them in the application and input engine. Installer language strings live in `installer/PadHop.iss`.
 
-Haptic recording needs optional Python and Microsoft Bluetooth analysis tools, configured with `configure-capture.ps1`. Raw ETL/PCAP traces can include other Bluetooth traffic and sensitive device data; do not publish raw capture directories. Prefer exported profile parameters. Detailed technical guides (currently Chinese): [recording](docs/capture.md), [privacy](docs/privacy.md), [release validation](docs/release.md), [local signing recovery](docs/local-signing.md).
+Click **Install recording components** in the recording section to download, verify and configure Python and Microsoft Bluetooth analysis tools. Existing components are reused; failures provide a setup log and can be retried. Raw ETL/PCAP traces can include other Bluetooth traffic and sensitive device data; do not publish raw capture directories. Prefer exported profile parameters. Detailed technical guides (currently Chinese): [recording](docs/capture.md), [privacy](docs/privacy.md), [release validation](docs/release.md), [local signing recovery](docs/local-signing.md).
 
 ## License and acknowledgments
 
