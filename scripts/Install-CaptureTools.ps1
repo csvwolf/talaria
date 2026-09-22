@@ -2,7 +2,10 @@
 $ErrorActionPreference='Stop'
 $ProgressPreference='SilentlyContinue'
 [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
-$stage='start'
+# GUI processes launched by PowerShell 7 can inherit incompatible module paths.
+# Use Windows PowerShell's own, system-provided modules for signature checks.
+$env:PSModulePath=(Join-Path $PSHOME 'Modules')+';'+(Join-Path $env:ProgramFiles 'WindowsPowerShell\Modules')
+$stage='start' 
 function Step([string]$name){$script:stage=$name;Write-Output ('STEP '+$name)}
 function CheckHash([string]$path,[string]$expected){if(!(Test-Path -LiteralPath $path) -or (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash -ne $expected){throw 'HashMismatch'}}
 function MicrosoftSigned([string]$path){$s=Get-AuthenticodeSignature -LiteralPath $path;return $s.Status -eq 'Valid' -and $s.SignerCertificate.Subject -match 'O=Microsoft Corporation(?:,|$)'}
@@ -19,6 +22,7 @@ function Download([string]$url,[string]$target,[string]$hash){
  Write-Output ('HASH sha256='+$hash+' verified')
 }
 try{
+ Import-Module (Join-Path $PSHOME 'Modules\Microsoft.PowerShell.Security\Microsoft.PowerShell.Security.psd1') -ErrorAction Stop
  if($InstallMicrosoft){
   # Stage in a protected, system-readable directory: Windows Installer may not see a user's redirected LocalAppData.
   $hash='0DF5A3E3AEDE62770333FAB8FD2E044FC3BD6C891226F2087698291E7BAD69CA'
@@ -42,7 +46,7 @@ try{
  if(!$parser){$btpRoot=Join-Path $env:SystemDrive 'BTP';if(Test-Path $btpRoot){$parser=Get-ChildItem -LiteralPath $btpRoot -Filter BTETLParse.exe -Recurse -ErrorAction SilentlyContinue | Where-Object {$_.FullName -match '[\\/](x64|amd64)[\\/]' -and (MicrosoftSigned $_.FullName)} | Sort-Object FullName -Descending | Select-Object -First 1 -ExpandProperty FullName}}
  $wpr=Join-Path $env:WINDIR 'System32\wpr.exe';Write-Output ('DETECTED python='+[bool]$python+' parser='+[bool]$parser+' wpr='+(Test-Path $wpr))
  if(!(Test-Path $wpr)){throw 'WprMissing'}
- if($CheckOnly){if($python -and $parser){Write-Output 'READY'}else{Write-Output 'MISSING'};exit 0}
+ if($CheckOnly){if($python -and $parser){Write-Output 'READY';exit 0}else{Write-Output 'MISSING';exit 2}}
  New-Item -ItemType Directory -Force $root | Out-Null
  if(!$python){
   Step 'python-download';$zip=Join-Path $root 'python-3.12.10.zip';Download 'https://www.python.org/ftp/python/3.12.10/python-3.12.10-embed-amd64.zip' $zip '4ACBED6DD1C744B0376E3B1CF57CE906F9DC9E95E68824584C8099A63025A3C3'
@@ -62,5 +66,5 @@ try{
  $native=$_.Exception.NativeErrorCode;if($native -eq 1223){Write-Output 'CANCELLED';exit 1223}
  # Never dump exception text: it can include usernames and personal paths.
  $known=@('HashMismatch','DownloadFailed','WprMissing','PythonValidationFailed','MicrosoftSignatureInvalid','MicrosoftInstallFailed','ComponentValidationFailed');$reason=if($known -contains $_.Exception.Message){$_.Exception.Message}else{$_.Exception.GetType().Name}
- Write-Output ('FAILED step='+$stage+' reason='+$reason+' hresult='+$_.Exception.HResult);exit 1
+ Write-Output ('FAILED step='+$stage+' reason='+$reason+' hresult='+$_.Exception.HResult+' line='+$_.InvocationInfo.ScriptLineNumber);exit 1
 }

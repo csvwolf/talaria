@@ -1,6 +1,13 @@
 # Changelog
 
-## 0.2.15
+## 0.2.15 — replacement package
+
+- Fix recording setup launched from PowerShell 7 environments: load Windows PowerShell system modules explicitly so Microsoft signature validation is available.
+- Use Check recording components for existing tools, with repair offered only after a failed check.
+- Display setup, latest and device diagnostic logs inside Talaria with refresh and copy actions. Retain an in-memory fallback and show write errors instead of silently losing diagnostics.
+- Reuse installed recording dependencies without downloading them again.
+
+### Included changes
 
 - Support embedded Python module loading and retry transient executable sharing violations during local certificate renewal.
 

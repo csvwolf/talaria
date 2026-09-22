@@ -764,5 +764,18 @@
   "下载中…": "Downloading…",
   "安装中…": "Installing…",
   "校验中…": "Verifying…",
-  "正在校验下载文件…": "Verifying the downloaded file…"
+  "正在校验下载文件…": "Verifying the downloaded file…",
+  "录制组件安装日志": "Recording component setup log",
+  "尚无安装日志。点击安装后，这里会显示检测和安装结果。": "No setup log yet. Detection and installation results will appear here after setup starts.",
+  "刷新": "Refresh",
+  "复制日志": "Copy log",
+  "录制组件已配置，无需重复安装。可直接录制，或点击检查。": "Recording components are configured. No reinstall needed. Record now, or check the components.",
+  "修复录制组件": "Repair recording components",
+  "检查录制组件": "Check recording components",
+  "组件检测未通过，请点击“修复录制组件”。": "Component check failed. Click Repair recording components.",
+  "最近日志": "Latest log",
+  "设备诊断日志": "Device diagnostic log",
+  "日志文件不存在。": "The log file does not exist.",
+  "日志较大，仅显示末尾 2 MB。": "Large log: showing the last 2 MB.",
+  "无法读取日志：": "Cannot read log: "
 }
