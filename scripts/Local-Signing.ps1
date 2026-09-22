@@ -13,6 +13,12 @@ function NoLinks([string]$path){
   $parent=Split-Path $p -Parent;if($parent -eq $p){break};$p=$parent
  }
 }
+function CopyWithRetry([string]$source,[string]$destination){
+ for($attempt=0;$attempt -lt 21;$attempt++){
+  try{Copy-Item -LiteralPath $source -Destination $destination -Force;return}
+  catch{if(($_.Exception.HResult -band 0xffff) -notin @(32,33) -or $attempt -eq 20){throw};Start-Sleep -Milliseconds 150}
+ }
+}
 function Hash([string]$path){(Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash}
 function StatePath([string]$root){Join-Path $root '.local-signing\state.json'}
 function SaveState([string]$root,$state){
@@ -44,7 +50,7 @@ function RestoreFiles([string]$root,$state){
   if(!$expected -or (Hash $original) -ne $expected){throw ((T '原始备份校验失败：')+$name)}
   if(Test-Path $current){$h=Hash $current;if($h -ne $expected -and $h -ne $state.Signed.$name){throw ((T '程序已被其他版本修改，拒绝覆盖：')+$name+(T '。可用 RemoveTrust 撤销证书后重装。'))}}
  }
- foreach($name in $files){Copy-Item -LiteralPath (Join-Path $root ('.local-signing\original\'+$name)) -Destination (Join-Path $root $name) -Force}
+ foreach($name in $files){CopyWithRetry (Join-Path $root ('.local-signing\original\'+$name)) (Join-Path $root $name)}
 }
 function CleanState([string]$root){
  foreach($name in $files){
@@ -165,7 +171,7 @@ try {
  }
  $mode=Join-Path $root '.local-signing\staged\input-mode.txt';Set-Content $mode 'local-uiaccess' -Encoding ASCII;$signed['input-mode.txt']=Hash $mode
  SaveState $root $state
- foreach($n in $files){Copy-Item -LiteralPath (Join-Path $root ('.local-signing\staged\'+$n)) -Destination (Join-Path $root $n) -Force}
+ foreach($n in $files){CopyWithRetry (Join-Path $root ('.local-signing\staged\'+$n)) (Join-Path $root $n)}
  $probe=Start-Process (Join-Path $root 'PadHop.Input.exe') -ArgumentList '--check-uiaccess' -WindowStyle Hidden -PassThru
  try {
   if(!$probe.WaitForExit(15000)){$probe.Kill();throw (T 'UIAccess 检测超时。')}

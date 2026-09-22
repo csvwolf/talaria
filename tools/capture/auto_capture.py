@@ -9,6 +9,8 @@ import struct
 import subprocess
 import sys
 from collections import defaultdict
+# Embedded Python omits the script directory from sys.path.
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from analyze import analyze
 
 

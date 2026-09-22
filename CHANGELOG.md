@@ -2,6 +2,8 @@
 
 ## 0.2.15
 
+- Support embedded Python module loading and retry transient executable sharing violations during local certificate renewal.
+
 - Add an in-app recording component installer: reuse existing tools, verify official downloads, configure paths automatically and retain sanitized setup logs for troubleshooting.
 
 - Enable update notifications by default with a persistent opt-out; downloads and installation remain manual.

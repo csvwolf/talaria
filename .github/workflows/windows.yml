@@ -52,6 +52,8 @@ jobs:
           if($LASTEXITCODE){throw 'Recording component setup failed'}
           & powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/Install-CaptureTools.ps1 -CheckOnly
           if($LASTEXITCODE){throw 'Recording component detection failed'}
+          $capture=Get-Content (Join-Path $env:LOCALAPPDATA 'PadHop/capture-tools.json') -Raw | ConvertFrom-Json
+          ./scripts/test.ps1 -Python $capture.Python
       - name: Diagnose installer failure
         if: failure()
         shell: powershell
