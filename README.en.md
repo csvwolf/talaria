@@ -19,6 +19,22 @@ A Windows input utility for Steam Controller 2: global and per-app profiles, ind
 
 **Steam Controller 2 input is supported over Bluetooth, USB and Puck/receiver connections.** Haptic feedback and recording currently require Bluetooth; USB/receiver connections support input mapping and virtual Xbox output. Steam Deck/Moonlight forwarded devices are excluded.
 
+## Interface preview
+
+Actual application screens with default settings. Screenshots show Simplified Chinese; the app also supports English.
+
+**Input status** — Select a device and enable or pause controller input.
+
+![Input status](assets/screenshots/status.png)
+
+**Controller settings** — Select buttons by location, edit mappings, and try, apply or save profiles. Trackpad and haptic settings are on the same page.
+
+![Controller settings](assets/screenshots/controller.png)
+
+**Application rules** — Switch between inclusion and exclusion modes; import applications by clicking or dragging them in.
+
+![Application rules](assets/screenshots/rules.png)
+
 ## Installation
 
 Requires Windows 10 1903+ / Windows 11 x64 and .NET Framework 4.8. Download `install.exe` from Releases. The installer supports English and Simplified Chinese. Install as administrator; the application normally runs unelevated. Upgrade by running the new installer. Installation and upgrades preserve profiles. Uninstall through Windows Installed apps.

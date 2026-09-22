@@ -19,6 +19,22 @@ Windows 上的控制器输入配置工具：全局与单独应用配置、左右
 
 **支持 Steam Controller 2 的蓝牙、USB 和 Puck／接收器连接。** 触觉反馈与录制目前仅支持蓝牙；USB／接收器支持输入映射与虚拟 Xbox 输出。Steam Deck／Moonlight 转发设备不接管。
 
+## 界面预览
+
+以下为实际程序界面，使用默认配置展示；支持简体中文与 English。
+
+**接管状态** — 选择设备，启用或暂停手柄接管。
+
+![接管状态](assets/screenshots/status.png)
+
+**手柄输入设置** — 按位置选择按键，编辑映射并试用、应用或保存配置；同页可配置触摸板与触觉。
+
+![手柄输入设置](assets/screenshots/controller.png)
+
+**应用规则** — 切换黑白名单模式，点击或拖拽导入应用。
+
+![应用规则](assets/screenshots/rules.png)
+
 ## 安装与使用
 
 Windows 10 1903+/11 x64，.NET Framework 4.8。Release 下载 `install.exe`，选择中文或英文向导安装，从开始菜单打开 Talaria。升级运行新版安装程序；安装、升级均保留个人配置。卸载从 Windows「已安装的应用」进行。安装器需要管理员权限，程序安装后以普通用户运行。
