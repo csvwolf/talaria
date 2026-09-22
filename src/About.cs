@@ -41,9 +41,9 @@ internal sealed partial class PadHop
   checkUpdate=AboutButton(actions,L.T("检查更新"),delegate{CheckUpdates(false);});
   downloadUpdate=AboutButton(actions,L.T("下载更新"),delegate{DownloadUpdate();});downloadUpdate.Visibility=Visibility.Collapsed;
   installUpdate=AboutButton(actions,L.T("安装更新"),InstallUpdate);installUpdate.Visibility=Visibility.Collapsed;
-  autoUpdate=new CheckBox{Content=L.T("自动检查更新并提示"),IsChecked=File.Exists(Path.Combine(AppPaths.Data,"automatic-update-check.enabled"))};updates.Children.Add(autoUpdate);
-  autoUpdate.Checked+=delegate{if(live){AtomicWrite(Path.Combine(AppPaths.Data,"automatic-update-check.enabled"),"enabled");nextUpdateCheck=DateTime.MinValue;CheckUpdates(true);}};
-  autoUpdate.Unchecked+=delegate{if(live){string f=Path.Combine(AppPaths.Data,"automatic-update-check.enabled");if(File.Exists(f))File.Delete(f);updateStatus.Text=L.T("已关闭自动检查。仍可手动检查更新。");}};
+  autoUpdate=new CheckBox{Content=L.T("自动检查更新并提示"),IsChecked=!File.Exists(Path.Combine(AppPaths.Data,"automatic-update-check.disabled"))};updates.Children.Add(autoUpdate);
+  autoUpdate.Checked+=delegate{if(live){string disabled=Path.Combine(AppPaths.Data,"automatic-update-check.disabled");if(File.Exists(disabled))File.Delete(disabled);AtomicWrite(Path.Combine(AppPaths.Data,"automatic-update-check.enabled"),"enabled");nextUpdateCheck=DateTime.MinValue;CheckUpdates(true);}};
+  autoUpdate.Unchecked+=delegate{if(live){AtomicWrite(Path.Combine(AppPaths.Data,"automatic-update-check.disabled"),"disabled");string f=Path.Combine(AppPaths.Data,"automatic-update-check.enabled");if(File.Exists(f))File.Delete(f);updateStatus.Text=L.T("已关闭自动检查。仍可手动检查更新。");}};
   updates.Children.Add(new TextBlock{Text=L.T("开启后，启动时及运行期间每 24 小时检查。只提示，不自动下载或安装；下载和安装分别由你点击。"),Style=(Style)window.FindResource("Caption")});
   signingHost=AboutCard(L.T("本机签名"));
   signingHost.Children.Add(new TextBlock{Text=L.T("未启用本机自签。需要操作管理员窗口时，可重新运行 install.exe 勾选该组件。"),Style=(Style)window.FindResource("Caption")});

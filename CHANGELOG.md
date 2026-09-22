@@ -2,6 +2,10 @@
 
 ## 0.2.15
 
+- Enable update notifications by default with a persistent opt-out; downloads and installation remain manual.
+
+- Stabilize profile serialization so JSON property order cannot produce false unsaved/applied differences; preserve macro step order.
+
 - Support SC2 input over Bluetooth, USB and Puck/receiver; hide unconfirmed receiver slots and remove stale offline choices.
 - Pause firmware keyboard/mouse emulation on the selected USB/receiver interface during standalone virtual Xbox output, as with Bluetooth; restore on release.
 - Rename the tray action to Enable/Pause controller input, consistent with the main window.

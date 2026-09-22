@@ -36,7 +36,7 @@ Exclusion mode handles applications except those excluded; inclusion mode handle
 
 In **About**, select System, 简体中文 or English, then reopen Talaria. Existing profile names, application paths and mappings are not translated or reset. About also includes project/author links, log access, signature renewal and update controls.
 
-Automatic update checks are **off by default**. When enabled, Talaria checks at startup and every 24 hours while running, and only notifies you. Download and installation each require an explicit click. Downloads are checked against GitHub's SHA-256 digest, and installation still requires administrator confirmation. No logs or profiles are uploaded.
+Automatic update checks are **on by default** and can be disabled in About. Your choice is remembered. When enabled, Talaria checks at startup and every 24 hours while running, and only notifies you. Download and installation each require an explicit click. Downloads are checked against GitHub's SHA-256 digest, and installation still requires administrator confirmation. No logs or profiles are uploaded.
 
 Closing the window minimizes to tray. Launching again activates the existing instance. Data lives in `%LOCALAPPDATA%/PadHop` and survives uninstall. Use Share current profile when sharing with others; a full backup includes local application paths. Logs may contain paths and device identifiers: review before sharing.
 
