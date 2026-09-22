@@ -87,14 +87,8 @@ jobs:
           python3 - <<'PY'
           import json,re
           old=json.load(open('old.json'))
-          notes=re.sub(r'
-SHA-256.*', '', old['body'], flags=re.S)
-          notes+='
-
-**修正版安装包（版本仍为 v0.2.15）**：修复录制组件安装失败及日志打不开；已有组件显示“检查录制组件”，失败后可修复。已通过本机全新下载、校验和安装验证。若之前下载过此版本，请重新下载安装包。
-
-Replacement package: fixes recording component setup and log viewing. Existing components can be checked without reinstalling. Please download again if you obtained the earlier v0.2.15 package.
-'
+          notes=re.sub(r'\nSHA-256.*', '', old['body'], flags=re.S)
+          notes+='\n\n**修正版安装包（版本仍为 v0.2.15）**：修复录制组件安装失败及日志打不开；已有组件显示“检查录制组件”，失败后可修复。已通过本机全新下载、校验和安装验证。若之前下载过此版本，请重新下载安装包。\n\nReplacement package: fixes recording component setup and log viewing. Existing components can be checked without reinstalling. Please download again if you obtained the earlier v0.2.15 package.\n'
           open('notes.md','w').write(notes)
           PY
           hash=$(sha256sum release/install.exe | cut -d ' ' -f 1)

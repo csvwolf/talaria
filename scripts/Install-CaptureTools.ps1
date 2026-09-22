@@ -5,7 +5,7 @@ $ProgressPreference='SilentlyContinue'
 # GUI processes launched by PowerShell 7 can inherit incompatible module paths.
 # Use Windows PowerShell's own, system-provided modules for signature checks.
 $env:PSModulePath=(Join-Path $PSHOME 'Modules')+';'+(Join-Path $env:ProgramFiles 'WindowsPowerShell\Modules')
-$stage='start' 
+$stage='start'
 function Step([string]$name){$script:stage=$name;Write-Output ('STEP '+$name)}
 function CheckHash([string]$path,[string]$expected){if(!(Test-Path -LiteralPath $path) -or (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash -ne $expected){throw 'HashMismatch'}}
 function MicrosoftSigned([string]$path){$s=Get-AuthenticodeSignature -LiteralPath $path;return $s.Status -eq 'Valid' -and $s.SignerCertificate.Subject -match 'O=Microsoft Corporation(?:,|$)'}
