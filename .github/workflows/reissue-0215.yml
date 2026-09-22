@@ -35,7 +35,7 @@ jobs:
           gh api --paginate repos/$GH_REPO/releases --jq '.[] | select(.tag_name == "v0.2.15")' > old.json
           test "$(jq -r .draft old.json)" = true
           id=$(jq -r .id old.json)
-          gh api --method PATCH repos/$GH_REPO/git/refs/tags/v0.2.15 -f sha="$REPAIR_SHA" -F force=true
+          test "$(gh api repos/$GH_REPO/git/ref/tags/v0.2.15 --jq .object.sha)" = "$REPAIR_SHA"
           gh release upload v0.2.15 release/install.exe --clobber
           python3 - <<'PY'
           import json,re
