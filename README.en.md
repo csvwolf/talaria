@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
   <img src="assets/app.png" alt="Talaria icon" width="96" height="96" />
   <h1>Talaria · Steam Controller utility</h1>
   <p>Make Steam Controller 2 useful in more places.</p>
@@ -17,7 +17,7 @@
 
 A Windows input utility for Steam Controller 2: global and per-app profiles, independent trackpads and haptics, keyboard/mouse bindings, Windows shortcuts, macros, the system on-screen keyboard, and optional virtual Xbox controller output. This is an independent project, not affiliated with Valve.
 
-**0.2.9 experimental release: Bluetooth SC2 is the current supported connection.** USB/receiver connections and Steam Deck/Moonlight forwarded controllers are not currently supported. Protocol and firmware differences need hardware testing; automated tests cannot establish compatibility with every game.
+**Steam Controller 2 input is supported over Bluetooth, USB and Puck/receiver connections.** Haptic feedback and recording currently require Bluetooth; USB/receiver connections support input mapping and virtual Xbox output. Steam Deck/Moonlight forwarded devices are excluded.
 
 ## Installation
 
@@ -30,7 +30,7 @@ Requires Windows 10 1903+ / Windows 11 x64 and .NET Framework 4.8. Download `ins
 
 ## Profiles and language
 
-Select your Bluetooth SC2 on Input status. Under Controller settings, choose or create a profile. **Try** previews the edited parameters; **Apply** controls the active profile; **Save** overwrites the named profile; **Save as** creates a copy. Trackpad actions and haptics belong to the same controller profile.
+Select your connected SC2 on Input status. Under Controller settings, choose or create a profile. **Try** previews the edited parameters; **Apply** controls the active profile; **Save** overwrites the named profile; **Save as** creates a copy. Trackpad actions and haptics belong to the same controller profile.
 
 Exclusion mode handles applications except those excluded; inclusion mode handles only explicitly included applications. App profiles are independent of these rules. Steam ordinary windows follow app rules; Big Picture and overlays remain with Steam.
 
@@ -60,10 +60,12 @@ Talaria is [MIT licensed](LICENSE). Trackpad behavior references SteamlessContro
 
 ## Upgrading from PadHop
 
-Talaria is the new name for PadHop. Run the new `install.exe` to upgrade in place. Settings, language preference and installation identity are retained; internal directories still use `PadHop`. Older updaters do not accept the renamed download URL: download this upgrade manually from Releases once. Automatic checks only notify; downloading and installing remain explicit actions.
+Talaria is the new name for PadHop. Run the new `install.exe` to upgrade in place. Settings, language preference and installation identity are retained; installation and profile directories still use `PadHop`; logs now use `%LOCALAPPDATA%/Talaria/logs`, accessible from About. Legacy logs are copied without deleting originals. Older updaters do not accept the renamed download URL: download this upgrade manually from Releases once. Automatic checks only notify; downloading and installing remain explicit actions.
 
 ## Scrolling and game prompts
 
 Each scrolling trackpad has independent wheel/natural direction and reversal buffering (default 0.4%; 0 disables it). Small reverse jitter is ignored. These settings are saved with the whole profile. New profiles copy current edits; the mouse starter preset includes Steamless reference feel.
 
 With Steam closed, virtual Xbox takeover temporarily disables the selected SC2 firmware keyboard/mouse emulation, preventing duplicate gamepad and keyboard events. Leaving the active app, pausing or exiting normally restores firmware defaults. Settings are not overwritten while Steam is running: avoid competing Steam/Talaria mappings. Explicit keyboard/mouse bindings such as L4 → Win still intentionally switch game prompts.
+
+Device discovery merges Raw Input and HID interfaces. Selected devices absent from Raw Input use shared read-only HID fallback. Only receiver slots that deliver valid controller state during refresh are shown. Turn the controller on, then refresh. Select the device again after changing connection type. For missing devices, open device diagnostics in About and review device names before sharing; do not share the entire logs folder.

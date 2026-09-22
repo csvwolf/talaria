@@ -22,7 +22,7 @@ internal static class MouseHelper
     static int Main(string[] args)
     {
         if (args.Length == 1 && args[0] == "--check-uiaccess") return HasUIAccess() ? 0 : 2;
-        string logDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "PadHop", "logs"); Directory.CreateDirectory(logDirectory);
+        string logDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Talaria", "logs"); Directory.CreateDirectory(logDirectory);
         string logPath = Path.Combine(logDirectory, "input-" + Process.GetCurrentProcess().Id + ".log");
         using (log = new StreamWriter(logPath))
         {

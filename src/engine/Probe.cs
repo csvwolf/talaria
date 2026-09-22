@@ -65,8 +65,8 @@ internal static class Probe
                 }
             }
             if(DiagnosticLog && (Continuous || Seconds>300))throw new ArgumentException("Detailed diagnostics require --seconds 300 or less, without --continuous");
-            if(devicesJson!=null){var rows=new List<object>();foreach(var d in Devices.Enumerate(false).Values)if(DeviceGate.IsSc2(d.Type,d.Vid,d.Pid,d.Page,d.Usage))rows.Add(new {Path=d.Path,Pid=d.Pid,Label=DeviceGate.FriendlyName(d.Path)});File.WriteAllText(devicesJson,new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(rows));return 0;}
-            if (test) { StandaloneInputLease.Test();BindingEngine.Test();PadSources.Test();StickSources.Test();VirtualGamepad.Test(); DeviceGate.Test(); Decoder.Test(); MappingTests.Run();ButtonEdge.Test(); DualPads.Test();PointerFeelTests.Run();SteamlessCadence.Test(); return 0; }
+            if(devicesJson!=null){var rows=new List<object>();var found=HidDiscovery.Merge(Devices.Enumerate(false).Values);HidDiscovery.VerifySlots(found);DeviceDiagnostics.Write(Path.Combine(Path.GetDirectoryName(Path.GetFullPath(devicesJson)),"devices-diagnostic.log"),found);foreach(var d in found)if(DeviceGate.IsSc2(d.Type,d.Vid,d.Pid,d.Page,d.Usage))rows.Add(new {Path=d.Path,Pid=d.Pid,Label=DeviceGate.Transport(d.Pid,d.Path)=="bluetooth"?DeviceGate.FriendlyName(d.Path):"Steam Controller 2",Transport=DeviceGate.Transport(d.Pid,d.Path),Source=d.Source,State=d.State});File.WriteAllText(devicesJson,new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(rows));return 0;}
+            if (test) { HidDiscovery.Test();DeviceDiagnostics.Test();StandaloneInputLease.Test();BindingEngine.Test();PadSources.Test();StickSources.Test();VirtualGamepad.Test(); DeviceGate.Test(); Decoder.Test(); MappingTests.Run();ButtonEdge.Test(); DualPads.Test();PointerFeelTests.Run();SteamlessCadence.Test(); return 0; }
             if(outputTest){KeyboardOutputTest.Run();return 0;}
             if(virtualTest){VirtualGamepad.DeviceTest();return 0;}
             if(keyboardTest){BridgeClient.KeyboardTest();return 0;}
@@ -94,7 +94,7 @@ internal sealed class Device
     internal IntPtr Handle;
     internal uint Type, Vid, Pid;
     internal ushort Page, Usage;
-    internal string Path;
+    internal string Path;internal string Source="RawInput",State="not-probed";
     internal bool Selected { get { return Probe.Preview!=null ? DeviceGate.Allows(Type,Vid,Pid,Page,Usage,Path,Probe.DevicePath) : Type == 2 && (Probe.Match.Length > 0 ? Path.IndexOf(Probe.Match, StringComparison.OrdinalIgnoreCase) >= 0 : Vid == 0x28de && Pid != 0x11ff); } }
     internal string Label { get { return Vid == 0x28de ? (Pid == 0x1302 ? "SC2 USB" : Pid == 0x1303 ? "SC2 Bluetooth LE" : Pid == 0x1304 || Pid == 0x1305 ? "SC2-family receiver (not proof of connected controller)" : Pid == 0x11ff ? "Steam virtual gamepad (excluded by default)" : "Valve candidate; confirm SC2 via path and state reports") : "other"; } }
     public override string ToString() { return string.Format("h=0x{0:X} type={1} VID={2:X4} PID={3:X4} TLC={4:X4}:{5:X4} selected={6} {7}\n  {8}", Handle.ToInt64(), Type, Vid, Pid, Page, Usage, Selected, Label, Path); }
@@ -102,9 +102,10 @@ internal sealed class Device
 
 internal static class Devices
 {
+    internal static int ReadFailures;
     internal static Dictionary<IntPtr, Device> Enumerate(bool print)
     {
-        uint count = 0;
+        ReadFailures=0;uint count = 0;
         uint size = (uint)Marshal.SizeOf(typeof(Native.DeviceList));
         if (Native.GetRawInputDeviceList(IntPtr.Zero, ref count, size) == uint.MaxValue) throw new Win32Exception();
         for (int attempt = 0; attempt < 4; attempt++)
@@ -120,6 +121,7 @@ internal static class Devices
                 {
                     var entry = (Native.DeviceList)Marshal.PtrToStructure(IntPtr.Add(p, checked(i * (int)size)), typeof(Native.DeviceList));
                     Device d = Read(entry.Handle, entry.Type);
+                    if(d==null)ReadFailures++;
                     if (d != null) { result[d.Handle] = d; if (print) Probe.Say(d.ToString()); }
                 }
                 return result;
@@ -162,19 +164,20 @@ internal sealed class Observer : NativeWindow, IDisposable
     readonly Stopwatch elapsed = Stopwatch.StartNew();
     long reports, decoded;
     double nextStatus = 5;
-    bool disposed;
+    bool disposed;HidInput fallback;
     internal Observer()
     {
         // Message-only window never takes focus from the game.
         CreateHandle(new CreateParams { Caption = "SC2Probe", Parent = new IntPtr(-3) });
         Refresh(true);
         Probe.Say(Probe.Continuous ? "Bridge running without a time limit; pause/exit or F12 stops it." : "Capture started for " + Probe.Seconds + " seconds; keep game/Steam foreground. No reports is INCONCLUSIVE.");
-        timer.Interval = Probe.Preview == null ? 250 : 100;
+        timer.Interval = Probe.Preview == null ? 250 : 16;
         timer.Tick += delegate
         {
             if(Probe.FatalError!=null){Application.ExitThread();return;}
             if (Probe.StopFile!=null && File.Exists(Probe.StopFile)) { if(Probe.Preview!=null)Probe.Preview.Reset("requested-stop"); Application.ExitThread(); return; }
             if (Probe.Preview != null) Probe.Preview.Poll();
+            if(fallback!=null)try{for(int i=0;i<64;i++){var bytes=fallback.Poll();if(bytes==null)break;uint mask;if(Decoder.Decode(bytes,out mask)!=null){Probe.Preview.Report(new IntPtr(-2),bytes,true);reports++;decoded++;}}}catch(Exception){fallback.Dispose();fallback=null;Probe.Preview.Reset("HID-read-failed");Probe.Say("HID_READ_FAILED");}
             if (elapsed.Elapsed.TotalSeconds >= nextStatus)
             {
                 Probe.Say("STATUS seconds=" + (int)elapsed.Elapsed.TotalSeconds + " reports=" + reports + " decoded=" + decoded);
@@ -188,6 +191,8 @@ internal sealed class Observer : NativeWindow, IDisposable
     void Refresh(bool print)
     {
         devices = Devices.Enumerate(print);
+        if(Probe.Preview!=null){bool raw=devices.Values.Any(d=>d.Selected);if(raw && fallback!=null){fallback.Dispose();fallback=null;Probe.Preview.Reset("HID-to-RawInput");}if(!raw && fallback==null && !string.IsNullOrWhiteSpace(Probe.DevicePath))try{var selected=HidDiscovery.Enumerate().Find(d=>DeviceGate.Allows(d.Type,d.Vid,d.Pid,d.Page,d.Usage,d.Path,Probe.DevicePath));if(selected!=null){fallback=new HidInput(selected.Path);Probe.Say("HID_SHARED_FALLBACK_STARTED");}}catch(Exception){Probe.Say("HID_SHARED_FALLBACK_UNAVAILABLE");}}
+
         foreach (Device d in devices.Values)
         {
             if (!d.Selected) continue;
@@ -256,7 +261,7 @@ internal sealed class Observer : NativeWindow, IDisposable
     }
     public void Dispose()
     {
-        if (disposed) return; disposed = true; timer.Dispose();
+        if (disposed) return; disposed = true; timer.Dispose();if(fallback!=null){fallback.Dispose();fallback=null;}
         if (Probe.Preview != null) Probe.Preview.Reset("exit");
         foreach (uint key in registered)
         {

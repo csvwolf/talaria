@@ -1,4 +1,4 @@
-﻿SteamlessController — Copyright (c) 2026 Dylan Deverill, MIT License.
+SteamlessController — Copyright (c) 2026 Dylan Deverill, MIT License.
 Source: https://github.com/ddeverill/SteamlessController
 StandaloneInputLease adapts the feature-report framing and lizard mode commands from src/steam/SteamController.cpp and src/hid/HidDevice.cpp at the reference commit: clear digital mappings, raw trackpad settings, periodic reassertion and default restoration. Scope is selected BLE SC2 while virtual Xbox output is active and Steam is absent; no IMU setting changes.
 Menu/View bit positions verified against src/steam/SteamController.h (Menu: byte 2 bit 6, View: byte 3 bit 6).
@@ -25,3 +25,7 @@ License: licenses/ViGEmBus.txt. Driver is shared and retained on PadHop uninstal
 
 Inno Setup 6.7.3 — Jordan Russell and Martijn Laan. https://jrsoftware.org/
 License: licenses/InnoSetup.txt. Chinese translation is vendored unchanged from jrsoftware/issrc tag is-6_7_3, Files/Languages/Unofficial/ChineseSimplified.isl; author notices retained.
+
+SC2 transport classification and PID family were adapted from SteamlessController src/steam/SteamController.cpp/.h at the reference commit above. State layouts 0x42/0x45 share input mappings. Talaria retains shared Raw Input observation instead of upstream exclusive acquisition; Selected USB/receiver interfaces also support standalone firmware keyboard/mouse suppression while Steam is absent. Haptic writes remain gated to the verified BLE path.
+
+HidDiscovery follows the SetupAPI + HID attributes/caps discovery approach in SteamlessController src/hid/HidDevice.cpp and live-state slot verification in src/steam/SteamController.cpp at the pinned reference. Talaria uses shared read-only handles with its existing Raw Input path preferred, and bounded nonblocking input polling; no exclusive acquisition is ported.

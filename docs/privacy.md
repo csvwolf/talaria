@@ -1,6 +1,6 @@
-﻿# 数据与隐私
+# 数据与隐私
 
-没有遥测、账户系统或自动上传。运行期配置和诊断写入当前用户的 `%LOCALAPPDATA%/PadHop`；安装目录和 Git 源码不保存个人配置。
+没有遥测、账户系统或自动上传。配置保留在当前用户的 `%LOCALAPPDATA%/PadHop`；运行日志和诊断写入 `%LOCALAPPDATA%/Talaria/logs`（旧日志自动复制保留）；安装目录和 Git 源码不保存个人配置。
 
 「关于」页支持手动检查更新，或主动开启自动检查并提示（默认关闭）。自动检查仅获取版本信息，不下载或安装；下载、安装分别需要用户点击。开启后，启动时及运行期间每 24 小时检查。检查会连接 GitHub API，主动下载会连接 GitHub Release/CDN；这些服务会看到通常的网络请求信息（例如 IP 地址）。不发送配置、设备标识或日志。下载校验 GitHub 的 SHA-256 摘要，安装仍需用户确认。打开博客、微博或 GitHub 链接会交给系统默认浏览器。
 
@@ -13,3 +13,5 @@
 源码排除本地配置、原始采集、编译产物、证书及密钥。此检查不是独立安全审计保证。
 
 常规日志新增 INPUT_SUMMARY：仅本程序输出事件计数、虚拟手柄连接及原生键鼠接管状态，不含具体按键、输入文字、坐标或应用路径。排查用临时低级输入监测程序未包含在发行包中。
+
+Device refresh writes `devices-diagnostic.log`: product/display names (common hexadecimal IDs redacted), HID VID/PID/Usage, filter reasons, unreadable count, OS and app version. No device paths, input reports or addresses are intentionally included. Custom device names can still contain personal text; review this file before sharing. Do not send the entire logs folder, which can contain configuration snapshots or capture files.

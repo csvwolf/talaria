@@ -7,7 +7,7 @@ internal sealed partial class PadHop {
  double pendingWheel;bool wheelScheduled;
  static double WheelPixels(int delta,int lines,double viewport){return delta/120.0*(lines<0?viewport:lines*16.0);}
  void InstallFineWheel(){var viewer=Get<ScrollViewer>("PageScroll");viewer.PreviewMouseWheel+=delegate(object sender,System.Windows.Input.MouseWheelEventArgs e){if(e.Handled)return;DependencyObject node=e.OriginalSource as DependencyObject;while(node!=null && !(node is ScrollViewer)){node=node is Visual?VisualTreeHelper.GetParent(node):LogicalTreeHelper.GetParent(node);}if(node!=viewer)return;e.Handled=true;pendingWheel+=WheelPixels(e.Delta,SystemParameters.WheelScrollLines,viewer.ViewportHeight);if(wheelScheduled)return;wheelScheduled=true;viewer.Dispatcher.BeginInvoke(DispatcherPriority.Render,new Action(delegate{double amount=pendingWheel;pendingWheel=0;wheelScheduled=false;viewer.ScrollToVerticalOffset(Math.Max(0,Math.Min(viewer.ScrollableHeight,viewer.VerticalOffset-amount)));}));};}
- void TestScrollEditor(){
+ void TestScrollEditor(){if(VisibleDevice(new DeviceChoice{Transport="receiver",State="no-state-yet"}) || !VisibleDevice(new DeviceChoice{Transport="receiver",State="state-confirmed"}) || !VisibleDevice(new DeviceChoice{Transport="bluetooth",State="not-probed"}))throw new Exception("Receiver slot visibility");
   var original=Clone(padBook);padTabs.SelectedIndex=0;LoadPad();
   scrollDirection.SelectedIndex=1;Set("reversal",1.2);Set("dragThreshold",11);ReadEditor();
   if(CurrentPad.DragThresholdPx!=11 || parameterCells["dragThreshold"].Visibility!=Visibility.Collapsed)throw new Exception("Drag tolerance save/visibility");

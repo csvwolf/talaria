@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -6,13 +6,14 @@ using System.Threading;
 using Microsoft.Win32.SafeHandles;
 
 // SteamlessController command protocol (MIT); see THIRD-PARTY-NOTICES.
-// Only selected SC2 BLE, only while our virtual output is active and Steam absent.
+// Only selected SC2 BLE, USB or active receiver slot, only while our virtual output is active and Steam absent.
 // No flash writes, virtual-device hiding or global keyboard hooks.
 internal sealed class StandaloneInputLease:IDisposable {
  readonly string path;readonly Thread worker;readonly ManualResetEvent stop=new ManualResetEvent(false);
  internal volatile int State; // 0 waiting, 1 disabled, 2 Steam owns device, -1 failed
  internal static bool SteamRunning(){foreach(var p in Process.GetProcessesByName("steam")){p.Dispose();return true;}return false;}
- internal StandaloneInputLease(IntPtr raw){var d=Devices.Read(raw,2);if(d==null || !DeviceGate.IsSc2(d.Type,d.Vid,d.Pid,d.Page,d.Usage))throw new Exception("Standalone lease requires selected SC2 BLE");path=d.Path;worker=new Thread(Run){IsBackground=true};worker.Start();}
+ internal StandaloneInputLease(IntPtr raw):this(Devices.Read(raw,2)){}
+ internal StandaloneInputLease(Device d){if(d==null || !DeviceGate.FirmwareKeyboardControl(d))throw new Exception("Standalone lease requires selected SC2 BLE/USB");path=d.Path;worker=new Thread(Run){IsBackground=true};worker.Start();}
  internal static byte[] Command(int length,byte id,byte command){if(length<9 || length>128 || (id!=1 && id!=2))throw new ArgumentException("Unsupported command report");var b=new byte[length];b[0]=id;b[1]=command;if(command==0x87){b[2]=6;b[3]=8;b[6]=7;}else if(command!=0x81 && command!=0x85 && command!=0x8e)throw new ArgumentException("Unsupported command");return b;}
  void Run(){SafeFileHandle file=null;bool changed=false;byte id=0;int length=0;try{
   if(SteamRunning()){State=2;return;}

@@ -48,8 +48,9 @@ internal sealed partial class PadHop
   signingHost=AboutCard(L.T("本机签名"));
   signingHost.Children.Add(new TextBlock{Text=L.T("未启用本机自签。需要操作管理员窗口时，可重新运行 install.exe 勾选该组件。"),Style=(Style)window.FindResource("Caption")});
   var diagnostics=AboutCard(L.T("诊断与日志"));var logs=new WrapPanel();diagnostics.Children.Add(logs);
-  AboutButton(logs,L.T("打开日志文件夹"),delegate{string dir=Path.Combine(AppPaths.Data,"logs");Directory.CreateDirectory(dir);Process.Start(new ProcessStartInfo("explorer.exe",Quote(dir)){UseShellExecute=true});});
-  AboutButton(logs,L.T("打开最近日志"),delegate{var files=Directory.GetFiles(AppPaths.Data,"*.txt",SearchOption.TopDirectoryOnly).Concat(Directory.GetFiles(Path.Combine(AppPaths.Data,"logs"),"*.txt")).Concat(Directory.GetFiles(Path.Combine(AppPaths.Data,"logs"),"*.log")).Select(f=>new FileInfo(f)).OrderByDescending(f=>f.LastWriteTimeUtc).ToList();if(files.Count==0){Notice(L.T("还没有日志。复现问题后再打开。"));return;}Process.Start(new ProcessStartInfo("notepad.exe",Quote(files[0].FullName)){UseShellExecute=true});});
+  AboutButton(logs,L.T("打开日志文件夹"),delegate{string dir=AppPaths.Logs;Directory.CreateDirectory(dir);Process.Start(new ProcessStartInfo("explorer.exe",Quote(dir)){UseShellExecute=true});});
+  AboutButton(logs,L.T("打开最近日志"),delegate{var files=Directory.GetFiles(AppPaths.Data,"*.txt",SearchOption.TopDirectoryOnly).Concat(Directory.GetFiles(AppPaths.Logs,"*.txt")).Concat(Directory.GetFiles(AppPaths.Logs,"*.log")).Select(f=>new FileInfo(f)).OrderByDescending(f=>f.LastWriteTimeUtc).ToList();if(files.Count==0){Notice(L.T("还没有日志。复现问题后再打开。"));return;}Process.Start(new ProcessStartInfo("notepad.exe",Quote(files[0].FullName)){UseShellExecute=true});});
+  AboutButton(logs,L.T("打开设备诊断日志"),delegate{string diagnostic=System.IO.Path.Combine(AppPaths.Logs,"devices-diagnostic.log");if(!File.Exists(diagnostic))RefreshDevices();Process.Start(new ProcessStartInfo("notepad.exe",Quote(diagnostic)){UseShellExecute=true});});
   diagnostics.Children.Add(new TextBlock{Text=L.T("日志可能包含应用路径和设备标识，分享前可以先查看；不会自动上传。"),Style=(Style)window.FindResource("Caption")});
   if(live)window.Loaded+=delegate{PollUpdates();};
  }

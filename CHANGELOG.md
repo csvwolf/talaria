@@ -1,4 +1,42 @@
-﻿# Changelog
+# Changelog
+
+## 0.2.15
+
+- Support SC2 input over Bluetooth, USB and Puck/receiver; hide unconfirmed receiver slots and remove stale offline choices.
+- Pause firmware keyboard/mouse emulation on the selected USB/receiver interface during standalone virtual Xbox output, as with Bluetooth; restore on release.
+- Rename the tray action to Enable/Pause controller input, consistent with the main window.
+- Simplify device selection: remove experimental labels and the long connection hint. Device diagnostics are available in About.
+- Move runtime and diagnostic logs to `%LOCALAPPDATA%/Talaria/logs`; copy legacy logs without overwriting existing files or deleting originals. Preserve profiles and local signing.
+- Update Chinese and English setup and connection documentation. USB gamepad prompts verified with the physical mouse idle. USB/receiver haptics remain unavailable.
+
+## 0.2.14
+
+- Migrate logs from the legacy PadHop directory to Talaria and update all log-opening actions.
+
+## 0.2.13
+
+- Extend standalone firmware keyboard/mouse suppression to selected USB and receiver SC2 state-report interfaces, including HID fallback. Steam must be absent; haptics remain separately gated.
+- Remove disconnected connection placeholders from the device list; preserve the remembered selection in status only.
+
+- Show only state-confirmed receiver slots in the device picker; retain all candidates in diagnostics.
+- Consolidate the device diagnostic log entry under About.
+
+## 0.2.12
+
+- Merge SetupAPI HID discovery with Raw Input, deduplicated by interface path.
+- Probe candidate receiver/HID-only slots with bounded shared read-only input; report confirmed state, no state yet or read failure.
+- Add selected-interface HID read fallback when Raw Input is absent. No exclusive access, firmware or haptic writes on fallback. Hardware compatibility remains experimental.
+
+## 0.2.11
+
+- Add experimental SC2 USB/receiver Raw Input eligibility (1302–1305) and path-based transport labels adapted from SteamlessController.
+- Validate equivalent USB/BLE state mappings; retain exact selected-collection isolation and BLE-only firmware/haptic commands.
+- Direct HID discovery/read fallback is not included; empty receiver slots may be listed.
+
+## 0.2.10
+
+- Device refresh writes a shareable HID diagnostic log including product names, VID/PID/Usage and filtering reasons, with paths omitted and common address/ID patterns redacted.
+- Add an Open device diagnostics button; preserve BLE-only takeover filtering.
 
 ## 0.2.9
 

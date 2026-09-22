@@ -68,7 +68,7 @@ jobs:
         with:
           name: Talaria-installer
           path: release
-      - name: Publish experimental release
+      - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
@@ -80,9 +80,11 @@ jobs:
           cat > notes.md <<'NOTES'
           下载 **install.exe**，选择中文或英文向导安装；升级直接运行新版安装程序。
 
+          本次更新：支持蓝牙、USB 和 Puck／接收器输入，精简设备选择提示；日志迁移至 `%LOCALAPPDATA%/Talaria/logs`，保留原配置及旧日志。USB／接收器触觉暂未开放。
+
           - Windows 10 1903+ / Windows 11 x64，.NET Framework 4.8。
           - 可选安装 ViGEmBus；已有驱动会跳过，卸载保留个人配置与共享驱动。
-          - **实验版默认仅操作普通窗口；安装时可选本机自签，明确同意后在本机启用管理员窗口操作。未使用公共信任发布者签名。**
+          - **默认仅操作普通窗口；安装时可选本机自签，明确同意后在本机启用管理员窗口操作。未使用公共信任发布者签名。**
           - 安装器需要管理员权限；离线测试通过不代表所有设备、游戏已实测。
           Talaria is the new name for PadHop. Download install.exe and choose English or Chinese. Existing settings are preserved. Older PadHop versions require this one manual download after the repository rename.
           NOTES
@@ -91,4 +93,4 @@ jobs:
             echo 'Release already exists; refusing to replace published binaries.'
             exit 1
           fi
-          gh release create "$RELEASE_TAG" release/install.exe --verify-tag --title "Talaria $RELEASE_TAG · 标准实验版" --notes-file notes.md --prerelease --latest=false
+          gh release create "$RELEASE_TAG" release/install.exe --verify-tag --title "Talaria $RELEASE_TAG" --notes-file notes.md --prerelease --latest=false

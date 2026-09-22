@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -18,7 +18,7 @@ internal sealed class BridgePreview
     IntPtr window, device;
     uint pid;
     bool active;
-    long lastReport;
+    long lastReport;bool verifiedBle,firmwareControl;Device selectedInput;
     string target = "unknown";
     BridgeClient client;VirtualGamepad gamepad;StandaloneInputLease standalone;
     bool useHelper, helperPreview, failed;
@@ -62,16 +62,18 @@ internal sealed class BridgePreview
             heartbeat = clock.ElapsedMilliseconds; Transmit("Heartbeat");
         }
     }
-    internal void Report(IntPtr handle, byte[] bytes)
+    internal void Report(IntPtr handle, byte[] bytes,bool directHid=false)
     {
         Poll();
         if (!active) return;
+        uint bits;bool decoded=Decoder.Decode(bytes,out bits)!=null;if(!decoded)return;
         // Lock to first reporting controller until focus changes or a 500 ms gap.
         if (device != IntPtr.Zero && device != handle) return;
+        if(device!=handle){selectedInput=directHid?HidDiscovery.Enumerate().Find(d=>DeviceGate.Allows(d.Type,d.Vid,d.Pid,d.Page,d.Usage,d.Path,Probe.DevicePath)):Devices.Read(handle,2);verifiedBle=!directHid && DeviceGate.VerifiedBle(selectedInput);firmwareControl=DeviceGate.FirmwareKeyboardControl(selectedInput);}
         device = handle; lastReport = clock.ElapsedMilliseconds;
-        uint bits; bool decoded=Decoder.Decode(bytes,out bits)!=null;touchingRight=decoded && (bits&0x200000)!=0;
-        if(decoded && currentBook!=null && currentBook.VirtualOutputEnabled && currentBook.NeedsVirtualGamepad && useHelper && !helperPreview){if(gamepad==null){gamepad=new VirtualGamepad(currentBook);if(!StandaloneInputLease.SteamRunning())standalone=new StandaloneInputLease(handle);}gamepad.Update(bytes,bits);reportCount++;}
-        Emit(ownership.Mix(dual==null?engine.Step(bytes):dual.Step(bytes,handle,window,useHelper && !helperPreview),0), "mapped");
+        touchingRight=decoded && (bits&0x200000)!=0;
+        if(decoded && currentBook!=null && currentBook.VirtualOutputEnabled && currentBook.NeedsVirtualGamepad && useHelper && !helperPreview){if(gamepad==null){gamepad=new VirtualGamepad(currentBook);if(firmwareControl && !StandaloneInputLease.SteamRunning())standalone=new StandaloneInputLease(selectedInput);}gamepad.Update(bytes,bits);reportCount++;}
+        Emit(ownership.Mix(dual==null?engine.Step(bytes):dual.Step(bytes,handle,window,useHelper && !helperPreview && verifiedBle),0), "mapped");
         if(decoded && bindings!=null){Emit(stickSources.Mouse(currentBook,bytes,clock.ElapsedMilliseconds),"stick");ulong sources=dual==null?bits:padSources.Read(currentBook,bytes,bits,dual.Pressed(0),dual.Pressed(1));Emit(ownership.Mix(bindings.Step(sources,clock.ElapsedMilliseconds),1),"button");}
     }
     void Emit(List<string> actions, string reason)
