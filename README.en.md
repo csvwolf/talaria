@@ -40,6 +40,17 @@ Automatic update checks are **on by default** and can be disabled in About. Your
 
 Closing the window minimizes to tray. Launching again activates the existing instance. Data lives in `%LOCALAPPDATA%/PadHop` and survives uninstall. Use Share current profile when sharing with others; a full backup includes local application paths. Logs may contain paths and device identifiers: review before sharing.
 
+## Recording components and logs
+
+Ordinary mappings and presets do not need recording components. For Bluetooth haptic recording, open the recording section under **Controller settings → Haptic feedback**:
+
+- On first use, click **Install recording components**. After confirmation, Talaria downloads, verifies, installs and configures the dependencies. The button shows the current stage; Microsoft component installation may require administrator confirmation.
+- Once configured, the button becomes **Check recording components**. You can record immediately or run the check; checking does not download or reinstall anything. A failed check offers **Repair recording components**.
+- The private Python runtime does not change system PATH. Existing usable components are reused.
+- **Open setup log** displays results inside Talaria with refresh and copy actions. **About → Diagnostics and logs** also opens recent logs and device diagnostics. Log files live in `%LOCALAPPDATA%/Talaria/logs`.
+
+See the [recording guide](docs/capture.md) for capture and recovery details. Raw Bluetooth traces may contain other devices' data; do not publish entire capture directories.
+
 ## Build from source
 
 Run in Windows PowerShell:
