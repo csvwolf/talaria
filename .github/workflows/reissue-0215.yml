@@ -1,0 +1,19 @@
+name: Reissue v0.2.15 (temporary)
+on:
+  push:
+    branches: [master]
+    paths: ['.github/workflows/reissue-0215.yml']
+permissions:
+  contents: write
+jobs:
+  withdraw:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Withdraw only v0.2.15
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          id=$(gh api repos/$GH_REPO/releases/tags/v0.2.15 --jq .id)
+          gh api --method PATCH repos/$GH_REPO/releases/$id -F draft=true --jq '{tag_name,draft}'
