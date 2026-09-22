@@ -44,6 +44,14 @@ jobs:
         timeout-minutes: 5
         shell: powershell
         run: ./scripts/test-installer-ci.ps1
+      - name: Test recording component setup on disposable runner
+        timeout-minutes: 8
+        shell: powershell
+        run: |
+          & powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/Install-CaptureTools.ps1
+          if($LASTEXITCODE){throw 'Recording component setup failed'}
+          & powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/Install-CaptureTools.ps1 -CheckOnly
+          if($LASTEXITCODE){throw 'Recording component detection failed'}
       - name: Diagnose installer failure
         if: failure()
         shell: powershell
