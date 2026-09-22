@@ -738,5 +738,10 @@
   "启用手柄接管": "Enable controller input",
   "暂停手柄接管": "Pause controller input",
   "●  手柄接管已启用": "●  Controller input active",
-  "Talaria · 手柄接管已启用": "Talaria · Controller input active"
+  "Talaria · 手柄接管已启用": "Talaria · Controller input active",
+  "设置已就绪 · F12 可立即暂停手柄接管": "Ready · F12 immediately pauses controller input",
+  "手柄接管已暂停。": "Controller input paused.",
+  "另一个手柄接管或采集进程正在运行，请先在原窗口停止，避免重复输入。": "Another controller input or capture process is running. Stop it in its window to prevent duplicate input.",
+  "手柄输入组件尚未安装，请重新安装应用。": "Controller input components are missing. Please reinstall the application.",
+  "已导入的触觉配置目前用于保存与查看，尚未接入日常桌面输出。此界面启用手柄接管时暂不输出震动。": "Imported haptic profiles are currently for saving and viewing, not everyday output. This legacy screen does not enable haptics."
 }
