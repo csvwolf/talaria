@@ -35,6 +35,10 @@ Windows 上的控制器输入配置工具：全局与单独应用配置、左右
 
 ![应用规则](assets/screenshots/rules.png)
 
+**应用配置** — 为应用或游戏建立独立的按键、触摸板与触觉配置；未配置的应用使用全局配置，导入不会改变黑白名单。
+
+![应用配置](assets/screenshots/app-profiles.png)
+
 ## 安装与使用
 
 Windows 10 1903+/11 x64，.NET Framework 4.8。Release 下载 `install.exe`，选择中文或英文向导安装，从开始菜单打开 Talaria。升级运行新版安装程序；安装、升级均保留个人配置。卸载从 Windows「已安装的应用」进行。安装器需要管理员权限，程序安装后以普通用户运行。

@@ -35,6 +35,10 @@ Actual application screens with default settings. Screenshots show Simplified Ch
 
 ![Application rules](assets/screenshots/rules.png)
 
+**App profiles** — Give each application or game its own button, trackpad and haptic settings. Applications without a profile use global settings; importing does not change inclusion/exclusion rules.
+
+![App profiles](assets/screenshots/app-profiles.png)
+
 ## Installation
 
 Requires Windows 10 1903+ / Windows 11 x64 and .NET Framework 4.8. Download `install.exe` from Releases. The installer supports English and Simplified Chinese. Install as administrator; the application normally runs unelevated. Upgrade by running the new installer. Installation and upgrades preserve profiles. Uninstall through Windows Installed apps.
