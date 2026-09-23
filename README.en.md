@@ -62,7 +62,7 @@ Closing the window minimizes to tray. Launching again activates the existing ins
 
 ## Xbox output and window switching
 
-**Enable virtual Xbox controller** belongs to each global/app profile. **Keep Xbox controller connected when switching windows**, below Enable input on the status page, is a global setting. It defaults to off and saves automatically.
+**Enable virtual Xbox controller** belongs to each global/app profile. **Keep Xbox controller connected when switching windows**, below Enable input on the status page, is a global setting. It defaults to on and saves automatically; an explicitly saved off preference is preserved.
 
 - Switching between apps that both need Xbox output reuses one virtual controller, clears held input and loads the foreground mapping.
 - With keep-connected off, entering an excluded app or a profile without Xbox output disconnects the device. Returning reconnects it and may play Windows device sounds.

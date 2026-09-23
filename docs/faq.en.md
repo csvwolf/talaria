@@ -10,7 +10,7 @@ Steam Input is Steam's own mapping system. Talaria creates an additional virtual
 
 ## Device sounds when switching windows
 
-Windows may play a sound when the virtual controller disconnects or reconnects. The global keep-connected switch on Input status reduces this and defaults to off. Outside active apps, a retained controller sends no actions but remains visible and may occupy a player slot. Pausing or exiting removes it.
+Windows may play a sound when the virtual controller disconnects or reconnects. The global keep-connected switch on Input status reduces this and defaults to on. Outside active apps, a retained controller sends no actions but remains visible and may occupy a player slot. Pausing or exiting removes it.
 
 ## Does each app get a separate Xbox controller?
 

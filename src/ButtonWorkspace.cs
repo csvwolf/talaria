@@ -7,9 +7,9 @@ using System.Windows.Media;
 internal sealed partial class PadHop {
  readonly Dictionary<string,Button> bindingRows=new Dictionary<string,Button>();TextBlock outputSummary;CheckBox virtualOutputBox;bool loadingOutput;
  void BuildConnectionSettings(){
-  var card=Get<StackPanel>("ConnectionOptions");string value;bool enabled=values.TryGetValue("keepVirtualConnected",out value) && string.Equals(value,"true",StringComparison.OrdinalIgnoreCase);
+  var card=Get<StackPanel>("ConnectionOptions");string value;bool enabled=!values.TryGetValue("keepVirtualConnected",out value) || string.Equals(value,"true",StringComparison.OrdinalIgnoreCase);
   var toggle=new CheckBox{Content=L.T("切换窗口时保持 Xbox 手柄连接"),IsChecked=enabled};card.Children.Add(toggle);
-  Hint(card,L.T("全局设置，默认关闭。开启可减少切窗拔插提示音；不接管时不输出操作，但其他应用仍能检测到 Xbox 手柄。暂停接管或退出时断开。"));
+  Hint(card,L.T("全局设置，默认开启。可减少切窗拔插提示音；不接管时不输出操作，但其他应用仍能检测到 Xbox 手柄。暂停接管或退出时断开。"));
   RoutedEventHandler change=delegate{Guard(delegate{values["keepVirtualConnected"]=(toggle.IsChecked==true).ToString();SaveRules();Notice(L.T("虚拟手柄连接设置已保存；适用于所有应用，试用期间的更改在结束试用后生效。"));});};toggle.Checked+=change;toggle.Unchecked+=change;
  }
  void BuildButtons(){var page=Get<StackPanel>("TouchPage");var card=Card(page,L.T("按位置设置按键"));var box=(UIElement)card.Parent;page.Children.Remove(box);page.Children.Insert(1,box);
