@@ -24,6 +24,10 @@ Exclusions stop Talaria output; they do not hide physical devices or disable Ste
 
 Pause Talaria for comparison, then check Steam device detection, the game's Steam Input mapping and in-game input settings. Device detection and usable mapping are separate questions. Some games may need restarting after reconnecting a controller; save progress first. A failure that persists with Talaria paused should not automatically be attributed to Talaria.
 
+## Why can USB/Puck play haptics but not record them?
+
+Output and recording use different paths. Bluetooth, USB and Puck support sending haptic feedback, but the recorder currently extracts Steam feedback parameters from Windows Bluetooth traces only. Record over Bluetooth, then use the saved profile on any of the three connections. See the [recording validation guide](capture.md) (Chinese).
+
 ## Recording components are already installed
 
 Use Check recording components; it does not download or reinstall anything. Failed checks offer repair. First-time installation shows detection, download, verification and installation stages. See the [recording guide](capture.md).

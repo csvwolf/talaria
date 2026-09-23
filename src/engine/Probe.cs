@@ -24,6 +24,9 @@ internal static class Probe
     {lock(logGate){
         if(!DiagnosticLog && !Testing){string category=new string(s.TakeWhile(c=>char.IsLetterOrDigit(c)||c=='_').Take(40).ToArray());if(category.Length==0)category="EVENT";DateTime prior;if(lastEvent.TryGetValue(category,out prior) && (DateTime.UtcNow-prior).TotalSeconds<5)return;lastEvent[category]=DateTime.UtcNow;s=category;}WriteLog(s);
     }}
+    internal static void HapticEdge(bool left,bool raw,bool pressed){WriteLog("HAPTIC_EDGE side="+(left?"left":"right")+" hardwareClick="+raw+" pressed="+pressed);}
+    internal static void FirmwareStatus(string state,Exception error){var win32=error as Win32Exception;WriteLog("FIRMWARE_MODE state="+state+(error==null?"":" error="+error.GetType().Name+" hresult="+error.HResult+(win32==null?"":" win32="+win32.NativeErrorCode)));}
+    internal static void HapticStatus(string transport,bool left,string state,int sent,Exception error){WriteLog("HAPTIC_OUTPUT transport="+transport+" side="+(left?"left":"right")+" state="+state+" sent="+sent+(error==null?"":" error="+error.GetType().Name+" hresult="+error.HResult));}
     internal static void InputSummary(bool active,bool xbox,int standalone,long reports,long keys,long mouse,long gameButtons){WriteLog("INPUT_SUMMARY active="+active+" xbox="+xbox+" standalone="+standalone+" reports="+reports+" keyEvents="+keys+" mouseEvents="+mouse+" mappedGameButtonEvents="+gameButtons);}
     static void WriteLog(string s){lock(logGate){string line = DateTime.UtcNow.ToString("o") + " " + s;if(logBytes>2*1024*1024)return;logBytes+=Encoding.UTF8.GetByteCount(line)+2;
         Console.WriteLine(line);
@@ -66,7 +69,7 @@ internal static class Probe
             }
             if(DiagnosticLog && (Continuous || Seconds>300))throw new ArgumentException("Detailed diagnostics require --seconds 300 or less, without --continuous");
             if(devicesJson!=null){var rows=new List<object>();var found=HidDiscovery.Merge(Devices.Enumerate(false).Values);HidDiscovery.VerifySlots(found);DeviceDiagnostics.Write(Path.Combine(Path.GetDirectoryName(Path.GetFullPath(devicesJson)),"devices-diagnostic.log"),found);foreach(var d in found)if(DeviceGate.IsSc2(d.Type,d.Vid,d.Pid,d.Page,d.Usage))rows.Add(new {Path=d.Path,Pid=d.Pid,Label=DeviceGate.Transport(d.Pid,d.Path)=="bluetooth"?DeviceGate.FriendlyName(d.Path):"Steam Controller 2",Transport=DeviceGate.Transport(d.Pid,d.Path),Source=d.Source,State=d.State});File.WriteAllText(devicesJson,new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(rows));return 0;}
-            if (test) { HidDiscovery.Test();DeviceDiagnostics.Test();StandaloneInputLease.Test();BindingEngine.Test();PadSources.Test();StickSources.Test();VirtualGamepad.Test(); DeviceGate.Test(); Decoder.Test(); MappingTests.Run();ButtonEdge.Test(); DualPads.Test();PointerFeelTests.Run();SteamlessCadence.Test(); return 0; }
+            if (test) { HidDiscovery.Test();DeviceDiagnostics.Test();StandaloneInputLease.Test();BindingEngine.Test();PadSources.Test();StickSources.Test();VirtualGamepad.Test();LiveFeedback.Test(); DeviceGate.Test(); Decoder.Test(); MappingTests.Run();ButtonEdge.Test(); DualPads.Test();PointerFeelTests.Run();SteamlessCadence.Test(); return 0; }
             if(outputTest){KeyboardOutputTest.Run();return 0;}
             if(virtualTest){VirtualGamepad.DeviceTest();return 0;}
             if(keyboardTest){BridgeClient.KeyboardTest();return 0;}

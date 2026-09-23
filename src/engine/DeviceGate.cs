@@ -3,6 +3,7 @@ internal static class DeviceGate {
  internal static bool IsSc2(uint type,uint vid,uint pid,ushort page,ushort usage){return type==2 && vid==0x28de && (pid==0x1302 || pid==0x1303 || pid==0x1304 || pid==0x1305) && page==0xff00 && usage==1;}
  // Transport detection follows SteamlessController; HID path precedes PID.
  internal static string Transport(uint pid,string path){string p=(path??"").ToLowerInvariant();if(p.Contains("{00001812-0000-1000-8000-00805f9b34fb}") || p.Contains("bthledevice") || p.Contains("bthenum"))return "bluetooth";if(pid==0x1304 || pid==0x1305)return "receiver";if(pid==0x1302 || pid==0x1303)return "usb";return "unknown";}
+ internal static bool HapticsEligible(Device d){return d!=null && IsSc2(d.Type,d.Vid,d.Pid,d.Page,d.Usage) && !string.IsNullOrWhiteSpace(d.Path) && Transport(d.Pid,d.Path)!="unknown";}
  internal static bool VerifiedBle(Device d){return d!=null && IsSc2(d.Type,d.Vid,d.Pid,d.Page,d.Usage) && d.Pid==0x1303 && Transport(d.Pid,d.Path)=="bluetooth";}
  internal static bool FirmwareKeyboardControl(Device d){return VerifiedBle(d) || (d!=null && IsSc2(d.Type,d.Vid,d.Pid,d.Page,d.Usage) && ((d.Pid==0x1302 && Transport(d.Pid,d.Path)=="usb") || ((d.Pid==0x1304 || d.Pid==0x1305) && Transport(d.Pid,d.Path)=="receiver")));}
  internal static bool Allows(uint type,uint vid,uint pid,ushort page,ushort usage,string path,string selected){return IsSc2(type,vid,pid,page,usage) && !string.IsNullOrWhiteSpace(selected) && string.Equals(path,selected,StringComparison.OrdinalIgnoreCase);}

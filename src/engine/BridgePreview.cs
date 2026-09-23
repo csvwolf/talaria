@@ -18,7 +18,7 @@ internal sealed class BridgePreview
     IntPtr window, device;
     uint pid;
     bool active;
-    long lastReport;bool verifiedBle,firmwareControl;Device selectedInput;
+    long lastReport;bool hapticOutput;Device selectedInput;
     string target = "unknown";
     BridgeClient client;VirtualGamepad gamepad;StandaloneInputLease standalone;
     bool useHelper, helperPreview, failed;
@@ -29,6 +29,19 @@ internal sealed class BridgePreview
     internal void Start() { if (useHelper) client = new BridgeClient(targets, helperPreview, settingsPath); }
     internal void Close() {if(standalone!=null){standalone.Dispose();standalone=null;} Probe.InputSummary(active,gamepad!=null,standalone==null?0:standalone.State,reportCount,keyCount,mouseCount,gameButtonCount); if(gamepad!=null){gamepad.Dispose();gamepad=null;} if(dual!=null){dual.Dispose();dual=null;} if(feedback!=null) { Probe.Say("HAPTICS ticks="+feedback.Sent+" error="+(feedback.Error??"none")); feedback.Dispose(); feedback=null; } if (client != null) { client.Dispose(); client = null; } }
     internal static bool VirtualOutputAllowed(bool permitted,PadBook book){return permitted && book!=null && book.VirtualOutputEnabled && book.NeedsVirtualGamepad;}
+    internal static bool RawModeAllowed(bool permitted,bool helper,bool preview,bool steam){return permitted && helper && !preview && !steam;}
+    void ReleaseStandalone(){if(standalone!=null){standalone.Dispose();standalone=null;}}
+    void PollStandalone(){
+        if(!active || !useHelper || helperPreview){ReleaseStandalone();return;}
+        if(clock.ElapsedMilliseconds<leaseCheckAt)return;
+        leaseCheckAt=clock.ElapsedMilliseconds+1000;
+        if(!RawModeAllowed(active,useHelper,helperPreview,StandaloneInputLease.SteamRunning())){ReleaseStandalone();return;}
+        if(standalone!=null)return;
+        // Resolve the selected interface before the first state report: firmware
+        // desktop mode can otherwise leave a mouse-only profile waiting forever.
+        var selected=HidDiscovery.Enumerate().Find(d=>DeviceGate.Allows(d.Type,d.Vid,d.Pid,d.Page,d.Usage,d.Path,Probe.DevicePath));
+        if(selected!=null && DeviceGate.FirmwareKeyboardControl(selected))standalone=new StandaloneInputLease(selected);
+    }
     internal void AddTarget(string path)
     {
         if (!Path.IsPathRooted(path) || !File.Exists(path)) throw new ArgumentException("preview-target must be an existing absolute EXE path");
@@ -39,7 +52,9 @@ internal sealed class BridgePreview
         stickSources.Reset();padSources.Reset();if(bindings!=null)Emit(ownership.Mix(bindings.Reset(),1),reason);touchingRight=false; cadence.Reset(); if(feedback!=null)feedback.Clear();
         Emit(ownership.Mix(dual==null?engine.Reset():dual.Reset(),0), reason);ownership.Clear();
         Transmit("Reset");
-        if(gamepad!=null){if(detach){if(standalone!=null){standalone.Dispose();standalone=null;}gamepad.Dispose();gamepad=null;}else gamepad.Neutral();}
+        if(detach)ReleaseStandalone();
+        if(gamepad!=null){if(detach){gamepad.Dispose();gamepad=null;}else gamepad.Neutral();}
+        if(detach && dual!=null)dual.ReleaseFeedback();
         device = IntPtr.Zero;
     }
     internal void Poll()
@@ -54,11 +69,12 @@ internal sealed class BridgePreview
             window = current; pid = currentPid; target = ProcessPath(currentPid);
             if(globalBook!=null){var chosen=appProfiles==null?globalBook:appProfiles.Select(target,globalBook);if(!object.ReferenceEquals(chosen,currentBook))SetBook(chosen);}
             active = permitted;
-            if(!VirtualOutputAllowed(active,currentBook) && standalone!=null){standalone.Dispose();standalone=null;}
+            if(!active)ReleaseStandalone();
             if(gamepad!=null){if(VirtualOutputAllowed(active,currentBook))gamepad.Configure(currentBook);else if(settings==null || !settings.KeepVirtualConnected){gamepad.Dispose();gamepad=null;Probe.Say("VIRTUAL X360 disconnected: global keep connection disabled");}}
             if(gamepad!=null)Probe.Say("VIRTUAL X360 retained on focus change; output="+VirtualOutputAllowed(active,currentBook));
             Probe.Say("MAPPING foreground=" + (target ?? "unknown") + " active=" + active + " output=" + (useHelper && !helperPreview ? "UIAccess mouse helper" : "PREVIEW ONLY"));
         }
+        PollStandalone();
         if (device != IntPtr.Zero && clock.ElapsedMilliseconds - lastReport > 500) Reset("input-timeout",false);
         if(active && device!=IntPtr.Zero && bindings!=null)Emit(ownership.Mix(bindings.Tick(clock.ElapsedMilliseconds),1),"macro");
         if (active && device != IntPtr.Zero && clock.ElapsedMilliseconds - heartbeat >= 100)
@@ -73,11 +89,11 @@ internal sealed class BridgePreview
         uint bits;bool decoded=Decoder.Decode(bytes,out bits)!=null;if(!decoded)return;
         // Lock to first reporting controller until focus changes or a 500 ms gap.
         if (device != IntPtr.Zero && device != handle) return;
-        if(device!=handle){selectedInput=directHid?HidDiscovery.Enumerate().Find(d=>DeviceGate.Allows(d.Type,d.Vid,d.Pid,d.Page,d.Usage,d.Path,Probe.DevicePath)):Devices.Read(handle,2);verifiedBle=!directHid && DeviceGate.VerifiedBle(selectedInput);firmwareControl=DeviceGate.FirmwareKeyboardControl(selectedInput);}
+        if(device!=handle){selectedInput=directHid?HidDiscovery.Enumerate().Find(d=>DeviceGate.Allows(d.Type,d.Vid,d.Pid,d.Page,d.Usage,d.Path,Probe.DevicePath)):Devices.Read(handle,2);hapticOutput=DeviceGate.HapticsEligible(selectedInput);}
         device = handle; lastReport = clock.ElapsedMilliseconds;
         touchingRight=decoded && (bits&0x200000)!=0;
-        if(decoded && VirtualOutputAllowed(active,currentBook) && useHelper && !helperPreview){if(gamepad==null)gamepad=new VirtualGamepad(currentBook);if(standalone==null && firmwareControl && clock.ElapsedMilliseconds>=leaseCheckAt){leaseCheckAt=clock.ElapsedMilliseconds+1000;if(!StandaloneInputLease.SteamRunning())standalone=new StandaloneInputLease(selectedInput);}gamepad.Update(bytes,bits);reportCount++;}
-        Emit(ownership.Mix(dual==null?engine.Step(bytes):dual.Step(bytes,handle,window,useHelper && !helperPreview && verifiedBle),0), "mapped");
+        if(decoded && VirtualOutputAllowed(active,currentBook) && useHelper && !helperPreview){if(gamepad==null)gamepad=new VirtualGamepad(currentBook);gamepad.Update(bytes,bits);reportCount++;}
+        Emit(ownership.Mix(dual==null?engine.Step(bytes):dual.Step(bytes,handle,window,useHelper && !helperPreview && hapticOutput,selectedInput),0), "mapped");
         if(decoded && bindings!=null){Emit(stickSources.Mouse(currentBook,bytes,clock.ElapsedMilliseconds),"stick");ulong sources=dual==null?bits:padSources.Read(currentBook,bytes,bits,dual.Pressed(0),dual.Pressed(1));Emit(ownership.Mix(bindings.Step(sources,clock.ElapsedMilliseconds),1),"button");}
     }
     void Emit(List<string> actions, string reason)

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.17
+
+- Enable capability-checked haptic output on the selected USB/Puck interface as well as Bluetooth. Bluetooth recording remains the only supported capture path; recorded parameters can be reused across transports.
+- Trigger press haptics from the same resolved press state as mouse clicks, including pressure-only presses.
+- Manage firmware desktop mode during standalone mouse/keyboard takeover as well as virtual Xbox output; release control outside permitted apps and when Steam runs. Log mode changes and native failure codes.
+- Document haptic output versus recording support and a staged recording validation procedure. USB/Puck output was confirmed in local user testing; recording validation is separate.
+
 ## 0.2.16
 
 - Reuse one virtual Xbox device when switching between apps that need gamepad output; release held inputs and load the foreground profile without reconnecting.

@@ -1,6 +1,6 @@
 SteamlessController — Copyright (c) 2026 Dylan Deverill, MIT License.
 Source: https://github.com/ddeverill/SteamlessController
-StandaloneInputLease adapts the feature-report framing and lizard mode commands from src/steam/SteamController.cpp and src/hid/HidDevice.cpp at the reference commit: clear digital mappings, raw trackpad settings, periodic reassertion and default restoration. Scope is selected BLE SC2 while virtual Xbox output is active and Steam is absent; no IMU setting changes.
+StandaloneInputLease adapts the feature-report framing and lizard mode commands from src/steam/SteamController.cpp and src/hid/HidDevice.cpp at the reference commit: clear digital mappings, raw trackpad settings, periodic reassertion and default restoration. Scope is the selected BLE/USB/active receiver SC2 during permitted input takeover while Steam is absent, including mouse-only profiles; no IMU setting changes.
 Menu/View bit positions verified against src/steam/SteamController.h (Menu: byte 2 bit 6, View: byte 3 bit 6).
 Reference commit: 50114dff5e70f3b4094b76a972d9c2b068710d44
 Referenced src/app/TrackpadInput.cpp and .h: direct relative movement with fractional carry (0.01125), fine-grained wheel accumulation (0.02). Adapted for existing per-pad configuration, authenticated UIAccess transport, independent pressure clicks, and optional legacy whole-detent scrolling.
@@ -29,3 +29,5 @@ License: licenses/InnoSetup.txt. Chinese translation is vendored unchanged from 
 SC2 transport classification and PID family were adapted from SteamlessController src/steam/SteamController.cpp/.h at the reference commit above. State layouts 0x42/0x45 share input mappings. Talaria retains shared Raw Input observation instead of upstream exclusive acquisition; Selected USB/receiver interfaces also support standalone firmware keyboard/mouse suppression while Steam is absent. Haptic writes remain gated to the verified BLE path.
 
 HidDiscovery follows the SetupAPI + HID attributes/caps discovery approach in SteamlessController src/hid/HidDevice.cpp and live-state slot verification in src/steam/SteamController.cpp at the pinned reference. Talaria uses shared read-only handles with its existing Raw Input path preferred, and bounded nonblocking input polling; no exclusive acquisition is ported.
+
+Firmware-mode lifecycle reviewed against src/app/ControllerManager.cpp at 26c5b4ab6eee8aaf57eb9c99383eed3dfe475df2: keep raw mode alive before input reads to avoid firmware autonomous click haptics overlapping application feedback. Talaria yields firmware control whenever Steam is running.

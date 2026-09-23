@@ -17,7 +17,7 @@
 
 A Windows input utility for Steam Controller 2: global and per-app profiles, independent trackpads and haptics, keyboard/mouse bindings, Windows shortcuts, macros, the system on-screen keyboard, and optional virtual Xbox controller output. This is an independent project, not affiliated with Valve.
 
-**Steam Controller 2 input is supported over Bluetooth, USB and Puck/receiver connections.** Haptic feedback and recording currently require Bluetooth; USB/receiver connections support input mapping and virtual Xbox output. Steam Deck/Moonlight forwarded devices are excluded.
+**Steam Controller 2 supports input mapping, haptic output and virtual Xbox output over Bluetooth, USB and Puck/receiver connections.** Recording haptic parameters from Steam currently requires Bluetooth; saved recordings can be used over all three connections. Steam Deck/Moonlight forwarded devices are excluded.
 
 ## Interface preview
 

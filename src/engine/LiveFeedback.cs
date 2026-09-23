@@ -4,11 +4,11 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.Win32.SafeHandles;
 
-// Only the experimentally verified right-pad tick. No features, settings or rumble.
+// Shared HID output reports, capability-checked per selected SC2 interface. No feature writes.
 internal sealed class LiveFeedback : IDisposable
 {
     readonly System.Collections.Generic.HashSet<byte> supportedIds=new System.Collections.Generic.HashSet<byte>(); readonly SafeFileHandle file;
-    readonly int length;readonly bool left;
+    readonly int length;readonly bool left;readonly string transport;
     readonly Thread worker;
     readonly object gate=new object();
     readonly AutoResetEvent wake=new AutoResetEvent(false);
@@ -18,10 +18,12 @@ internal sealed class LiveFeedback : IDisposable
     long queuedAt;
     internal string Error;
     internal int Sent;
-    internal LiveFeedback(IntPtr rawDevice,bool leftPad)
+    internal LiveFeedback(IntPtr rawDevice,bool leftPad):this(Devices.Read(rawDevice,2),leftPad){}
+    internal LiveFeedback(Device d,bool leftPad)
     {
-        left=leftPad;Device d=Devices.Read(rawDevice,2);
-        if(d==null || d.Vid!=0x28de || d.Pid!=0x1303 || d.Page!=0xff00 || d.Usage!=1)throw new Exception("Haptics currently verified only on SC2 BLE FF00:1");
+        left=leftPad;
+        if(!DeviceGate.HapticsEligible(d) || !DeviceGate.Allows(d.Type,d.Vid,d.Pid,d.Page,d.Usage,d.Path,Probe.DevicePath))throw new Exception("Haptics require selected SC2 interface");
+        transport=DeviceGate.Transport(d.Pid,d.Path);
         file=CreateFile(d.Path,0x40000000,3,IntPtr.Zero,3,0x40000000,IntPtr.Zero);
         try {
             if(file.IsInvalid)throw new Win32Exception();
@@ -38,12 +40,13 @@ internal sealed class LiveFeedback : IDisposable
                         try {
                             int status=kind==0?HidP_GetValueCaps(1,entries,ref count,data):HidP_GetButtonCaps(1,entries,ref count,data);
                             if(status!=0x110000)throw new Exception("Output caps failed");
-                            for(int i=0;i<count;i++){byte id=Marshal.ReadByte(entries,i*72+2); if(id==0x81 || id==0x82 || id==0x83) supportedIds.Add(id); if(supportedIds.Contains(0x82) && supportedIds.Contains(0x83))supported=true;}
+                            for(int i=0;i<count;i++){byte id=Marshal.ReadByte(entries,i*72+2); if(id==0x81 || id==0x82 || id==0x83) supportedIds.Add(id); if(supportedIds.Count>0)supported=true;}
                         } finally { Marshal.FreeHGlobal(entries); }
                     }
                 } finally { Marshal.FreeHGlobal(caps); }
             } finally { HidD_FreePreparsedData(data); }
-            if(!supported || length<4 || length>128)throw new Exception("No supported 0x82 output report");
+            if(!supported || length<4 || length>128)throw new Exception("No supported haptic output report");
+            Probe.HapticStatus(transport,left,"ready",0,null);
             worker=new Thread(Run); worker.IsBackground=true; worker.Start();
         } catch { file.Dispose(); wake.Dispose(); throw; }
     }
@@ -56,14 +59,24 @@ internal sealed class LiveFeedback : IDisposable
         try {
             while(true) {
                 wake.WaitOne(100);
-                byte[] bytes; IntPtr wanted; long at;
-                lock(gate) { if(stopping)break; if(!queued)continue; bytes=packet; wanted=window; at=queuedAt; queued=false; }
+                byte[] bytes; IntPtr wanted; long at;bool click;
+                lock(gate) { if(stopping)break; if(!queued)continue; bytes=packet;click=queuedClick; wanted=window; at=queuedAt; queued=false; }
                 double age=(System.Diagnostics.Stopwatch.GetTimestamp()-at)/(double)System.Diagnostics.Stopwatch.Frequency;
                 if(age>0.025 || GetForegroundWindow()!=wanted || (GetAsyncKeyState(0x7b)&0x8000)!=0)continue;
-                if(bytes.Length<2 || bytes[1]!=(bytes[0]==0x81?(left?1:0):(left?0:1)) || !supportedIds.Contains(bytes[0]) || bytes.Length>length)throw new Exception("Unsupported waveform"); byte[] padded=new byte[length]; Array.Copy(bytes,padded,bytes.Length); WriteOnce(padded); Interlocked.Increment(ref Sent);
+                byte[] padded=Encode(bytes,left,length,supportedIds); WriteOnce(padded); int sent=Interlocked.Increment(ref Sent);if(click || sent==1 || sent%100==0)Probe.HapticStatus(transport,left,click?"click-sent":"sent",sent,null);
             }
-        } catch(Exception e) { Error=e.Message; lock(gate)stopping=true; }
-        finally { file.Dispose(); }
+        } catch(Exception e) { Error=e.Message;Probe.HapticStatus(transport,left,"failed",Sent,e); lock(gate)stopping=true; }
+        finally { Probe.HapticStatus(transport,left,"closed",Sent,null);file.Dispose(); }
+    }
+    internal static byte[] Encode(byte[] bytes,bool left,int length,System.Collections.Generic.HashSet<byte> ids){
+        if(bytes==null || bytes.Length<2 || length<4 || length>128 || bytes.Length>length || !ids.Contains(bytes[0]))throw new ArgumentException("Unsupported waveform/report size");
+        int required=bytes[0]==0x81?8:bytes[0]==0x82?4:bytes[0]==0x83?10:0;
+        if(required==0 || bytes.Length!=required || bytes[1]!=(bytes[0]==0x81?(left?1:0):(left?0:1)))throw new ArgumentException("Invalid waveform side or payload");
+        var padded=new byte[length];Array.Copy(bytes,padded,bytes.Length);return padded;
+    }
+    internal static void Test(){
+        foreach(uint pid in new uint[]{0x1302,0x1303,0x1304,0x1305}){var d=new Device{Type=2,Vid=0x28de,Pid=pid,Page=0xff00,Usage=1,Path="HID#selected"};if(!DeviceGate.HapticsEligible(d))throw new Exception("Haptic transport rejected");d.Usage=2;if(DeviceGate.HapticsEligible(d))throw new Exception("Non-controller collection accepted");}
+        var ids=new System.Collections.Generic.HashSet<byte>(new byte[]{0x81,0x82,0x83});foreach(bool left in new[]{false,true})foreach(string kind in new[]{"pulse","command","tone"}){var p=new WaveSpec{Kind=kind}.Packet(left);var b=Encode(p,left,64,ids);if(b.Length!=64 || b[1]!=p[1] || b[63]!=0)throw new Exception("Haptic padding/side");bool rejected=false;try{Encode(p,!left,64,ids);}catch(ArgumentException){rejected=true;}if(!rejected)throw new Exception("Cross-pad output accepted");}bool unsupported=false;try{Encode(new byte[]{0x82,1,1,244},false,64,new System.Collections.Generic.HashSet<byte>());}catch(ArgumentException){unsupported=true;}if(!unsupported)throw new Exception("Undeclared output accepted");
     }
     internal static byte[] Packet(int length,int gain) {
         if(length<4 || length>128 || gain < -42 || gain > -6)throw new ArgumentException("Haptic bounds");

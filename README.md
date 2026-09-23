@@ -17,7 +17,7 @@
 
 Windows 上的控制器输入配置工具：全局与单独应用配置、左右触摸板、键鼠映射、组合快捷键、宏、屏幕键盘，以及可选 Xbox 虚拟手柄输出。独立开发项目，与 Valve 无隶属关系。
 
-**支持 Steam Controller 2 的蓝牙、USB 和 Puck／接收器连接。** 触觉反馈与录制目前仅支持蓝牙；USB／接收器支持输入映射与虚拟 Xbox 输出。Steam Deck／Moonlight 转发设备不接管。
+**支持 Steam Controller 2 的蓝牙、USB 和 Puck／接收器连接：输入映射、触觉输出与虚拟 Xbox 输出均可使用。** 从 Steam 录制触觉参数目前仅支持蓝牙；录制后保存的配置可用于这三种连接。Steam Deck／Moonlight 转发设备不接管。
 
 ## 界面预览
 
