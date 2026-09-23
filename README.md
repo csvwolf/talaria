@@ -11,7 +11,7 @@
 
 **简体中文 · [English](README.en.md)**
 
-**[下载安装程序](https://github.com/csvwolf/talaria/releases) · [使用说明](#安装与使用) · [反馈问题](https://github.com/csvwolf/talaria/issues)**
+**[下载安装程序](https://github.com/csvwolf/talaria/releases) · [使用说明](#安装与使用) · [常见问题 / FAQ](docs/faq.md) · [反馈问题](https://github.com/csvwolf/talaria/issues)**
 
 </div>
 
