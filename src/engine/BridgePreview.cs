@@ -22,12 +22,13 @@ internal sealed class BridgePreview
     string target = "unknown";
     BridgeClient client;VirtualGamepad gamepad;StandaloneInputLease standalone;
     bool useHelper, helperPreview, failed;
-    long heartbeat,summaryAt,reportCount,keyCount,mouseCount,gameButtonCount;
+    long leaseCheckAt,heartbeat,summaryAt,reportCount,keyCount,mouseCount,gameButtonCount;
     TouchFeedback feedback; IntPtr feedbackDevice; bool feedbackFailed, touchingRight;
     readonly FeedbackCadence cadence=new FeedbackCadence();
     internal void EnableHelper(bool dry) { useHelper = true; helperPreview = dry; }
     internal void Start() { if (useHelper) client = new BridgeClient(targets, helperPreview, settingsPath); }
     internal void Close() {if(standalone!=null){standalone.Dispose();standalone=null;} Probe.InputSummary(active,gamepad!=null,standalone==null?0:standalone.State,reportCount,keyCount,mouseCount,gameButtonCount); if(gamepad!=null){gamepad.Dispose();gamepad=null;} if(dual!=null){dual.Dispose();dual=null;} if(feedback!=null) { Probe.Say("HAPTICS ticks="+feedback.Sent+" error="+(feedback.Error??"none")); feedback.Dispose(); feedback=null; } if (client != null) { client.Dispose(); client = null; } }
+    internal static bool VirtualOutputAllowed(bool permitted,PadBook book){return permitted && book!=null && book.VirtualOutputEnabled && book.NeedsVirtualGamepad;}
     internal void AddTarget(string path)
     {
         if (!Path.IsPathRooted(path) || !File.Exists(path)) throw new ArgumentException("preview-target must be an existing absolute EXE path");
@@ -49,10 +50,13 @@ internal sealed class BridgePreview
         bool permitted = !failed && current != IntPtr.Zero && (settings == null ? targets.Contains(ProcessPath(currentPid) ?? "") : settings.Allows(ProcessPath(currentPid), current));
         if (current != window || currentPid != pid || permitted != active)
         {
-            Reset("foreground-change",currentPid!=pid || !permitted);
+            Reset("foreground-change",false);
             window = current; pid = currentPid; target = ProcessPath(currentPid);
             if(globalBook!=null){var chosen=appProfiles==null?globalBook:appProfiles.Select(target,globalBook);if(!object.ReferenceEquals(chosen,currentBook))SetBook(chosen);}
             active = permitted;
+            if(!VirtualOutputAllowed(active,currentBook) && standalone!=null){standalone.Dispose();standalone=null;}
+            if(gamepad!=null){if(VirtualOutputAllowed(active,currentBook))gamepad.Configure(currentBook);else if(settings==null || !settings.KeepVirtualConnected){gamepad.Dispose();gamepad=null;Probe.Say("VIRTUAL X360 disconnected: global keep connection disabled");}}
+            if(gamepad!=null)Probe.Say("VIRTUAL X360 retained on focus change; output="+VirtualOutputAllowed(active,currentBook));
             Probe.Say("MAPPING foreground=" + (target ?? "unknown") + " active=" + active + " output=" + (useHelper && !helperPreview ? "UIAccess mouse helper" : "PREVIEW ONLY"));
         }
         if (device != IntPtr.Zero && clock.ElapsedMilliseconds - lastReport > 500) Reset("input-timeout",false);
@@ -72,7 +76,7 @@ internal sealed class BridgePreview
         if(device!=handle){selectedInput=directHid?HidDiscovery.Enumerate().Find(d=>DeviceGate.Allows(d.Type,d.Vid,d.Pid,d.Page,d.Usage,d.Path,Probe.DevicePath)):Devices.Read(handle,2);verifiedBle=!directHid && DeviceGate.VerifiedBle(selectedInput);firmwareControl=DeviceGate.FirmwareKeyboardControl(selectedInput);}
         device = handle; lastReport = clock.ElapsedMilliseconds;
         touchingRight=decoded && (bits&0x200000)!=0;
-        if(decoded && currentBook!=null && currentBook.VirtualOutputEnabled && currentBook.NeedsVirtualGamepad && useHelper && !helperPreview){if(gamepad==null){gamepad=new VirtualGamepad(currentBook);if(firmwareControl && !StandaloneInputLease.SteamRunning())standalone=new StandaloneInputLease(selectedInput);}gamepad.Update(bytes,bits);reportCount++;}
+        if(decoded && VirtualOutputAllowed(active,currentBook) && useHelper && !helperPreview){if(gamepad==null)gamepad=new VirtualGamepad(currentBook);if(standalone==null && firmwareControl && clock.ElapsedMilliseconds>=leaseCheckAt){leaseCheckAt=clock.ElapsedMilliseconds+1000;if(!StandaloneInputLease.SteamRunning())standalone=new StandaloneInputLease(selectedInput);}gamepad.Update(bytes,bits);reportCount++;}
         Emit(ownership.Mix(dual==null?engine.Step(bytes):dual.Step(bytes,handle,window,useHelper && !helperPreview && verifiedBle),0), "mapped");
         if(decoded && bindings!=null){Emit(stickSources.Mouse(currentBook,bytes,clock.ElapsedMilliseconds),"stick");ulong sources=dual==null?bits:padSources.Read(currentBook,bytes,bits,dual.Pressed(0),dual.Pressed(1));Emit(ownership.Mix(bindings.Step(sources,clock.ElapsedMilliseconds),1),"button");}
     }
@@ -89,7 +93,7 @@ internal sealed class BridgePreview
         if(action.StartsWith("KeyDown") || action.StartsWith("KeyUp") || action=="ToggleKeyboard")keyCount++;
         if(action.StartsWith("Move ") || action.StartsWith("Wheel ") || action.StartsWith("MouseDown") || action.StartsWith("MouseUp") || action=="LeftDown" || action=="LeftUp" || action=="RightDown" || action=="RightUp")mouseCount++;
         if(action.StartsWith("GameDown") || action.StartsWith("GameUp"))gameButtonCount++;
-        if(action.StartsWith("GameDown button=") || action.StartsWith("GameUp button=")){if(gamepad!=null)gamepad.Button(action.Substring(action.IndexOf('=')+1),action.StartsWith("GameDown"));return;}
+        if(action.StartsWith("GameDown button=") || action.StartsWith("GameUp button=")){if(gamepad!=null && VirtualOutputAllowed(active,currentBook))gamepad.Button(action.Substring(action.IndexOf('=')+1),action.StartsWith("GameDown"));return;}
         if (client == null) return;
         try {
             client.Send(action, window, pid);

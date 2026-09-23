@@ -78,7 +78,7 @@ internal sealed partial class PadHop
   if(live){window.SourceInitialized+=delegate{CreateTray();InstallShellHook();};timer.Interval=TimeSpan.FromMilliseconds(750);timer.Tick+=delegate{Poll();};timer.Start();}
   window.Closing+=delegate(object sender,System.ComponentModel.CancelEventArgs e){if(exiting && recorder!=null){e.Cancel=true;exiting=false;File.WriteAllText(recordResult+".stop","stop");Notice(L.T("正在结束录制，请收尾后再退出。"));return;}if(!exiting && tray!=null){Guard(delegate{Save();});e.Cancel=true;window.Hide();tray.ShowBalloonTip(2000,"Talaria",L.T("已收起到托盘。右键图标可暂停或退出。"),Forms.ToolTipIcon.Info);}};
   window.Closed+=delegate{StopActivation();timer.Stop();Stop();if(tray!=null){tray.Visible=false;tray.Dispose();}if(live)Application.Current.Shutdown();};
-  BuildWorkspace();BuildButtons();BuildApplications();BuildDevices(live);BuildScope();if(live)SaveLibrary();UpdateNumbers();Navigate("Desktop");ready=true;BuildAbout(live);BuildSigningMaintenance(live);
+  BuildWorkspace();BuildButtons();BuildApplications();BuildDevices(live);BuildConnectionSettings();BuildScope();if(live)SaveLibrary();UpdateNumbers();Navigate("Desktop");ready=true;BuildAbout(live);BuildSigningMaintenance(live);
  }
  void Guard(Action a){try{a();}catch(Exception e){Notice(e.Message);MessageBox.Show(window,e.Message,"Talaria",MessageBoxButton.OK,MessageBoxImage.Information);}}
  void Notice(string s){Get<TextBlock>("Footer").Text=s;}

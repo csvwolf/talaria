@@ -777,5 +777,11 @@
   "设备诊断日志": "Device diagnostic log",
   "日志文件不存在。": "The log file does not exist.",
   "日志较大，仅显示末尾 2 MB。": "Large log: showing the last 2 MB.",
-  "无法读取日志：": "Cannot read log: "
+  "无法读取日志：": "Cannot read log: ",
+  "切换窗口时保持连接": "Keep connected when switching windows",
+  "开启：离开接管窗口后保留 Xbox 设备连接，但不输出操作；其他应用仍能检测到手柄。\n关闭：不需要手柄输出时断开连接，可能听到系统拔插提示音。\n暂停接管或退出软件时，两种模式都会断开。": "On: keep the Xbox device connected outside active applications, without sending input. Other apps can still detect it.\nOff: disconnect when gamepad output is not needed; Windows may play device sounds.\nPausing or exiting disconnects in both modes.",
+  "虚拟手柄连接": "Virtual controller connection",
+  "全局设置，默认关闭。开启可减少切窗拔插提示音；不接管时不输出操作，但其他应用仍能检测到 Xbox 手柄。暂停接管或退出时断开。": "Global setting, off by default. Reduces device sounds when switching windows. No input is sent outside active apps, but other apps can still detect the Xbox device. Pausing or exiting disconnects it.",
+  "虚拟手柄连接设置已保存；适用于所有应用，试用期间的更改在结束试用后生效。": "Connection setting saved for all apps. Changes made during a trial take effect after the trial ends.",
+  "切换窗口时保持 Xbox 手柄连接": "Keep Xbox controller connected when switching windows"
 }

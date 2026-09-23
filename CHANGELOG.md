@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.16
+
+- Reuse one virtual Xbox device when switching between apps that need gamepad output; release held inputs and load the foreground profile without reconnecting.
+- Add a global, default-off Keep Xbox controller connected switch below Enable input. Retained devices stay neutral outside active apps and disconnect on pause or exit. Xbox output remains a per-profile choice.
+- Add bilingual FAQ pages covering Steam Input, connection behavior, recording setup and diagnostics.
+
 ## 0.2.15 — replacement package
 
 - Fix recording setup launched from PowerShell 7 environments: load Windows PowerShell system modules explicitly so Microsoft signature validation is available.

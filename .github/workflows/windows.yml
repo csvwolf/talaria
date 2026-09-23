@@ -90,7 +90,8 @@ jobs:
           cat > notes.md <<'NOTES'
           下载 **install.exe**，选择中文或英文向导安装；升级直接运行新版安装程序。
 
-          本次更新：支持蓝牙、USB 和 Puck／接收器输入，精简设备选择提示；日志迁移至 `%LOCALAPPDATA%/Talaria/logs`，保留原配置及旧日志。USB／接收器触觉暂未开放。录制页新增组件安装按钮、阶段进度和安装日志；更新检查默认开启，可自行关闭，下载与安装仍需点击。
+          本次更新：新增全局“切换窗口时保持 Xbox 手柄连接”开关（默认关闭），位于启用接管下方。需要 Xbox 输出的应用间切换复用同一设备；保持连接时，非接管窗口不输出操作，但其他应用仍可能看到空闲手柄。暂停或退出会断开。新增中英文 FAQ。
+          New: global, default-off keep-connected option; reuse one Xbox device across app profiles. Retained devices remain visible but neutral outside active apps. Bilingual FAQ added.
 
           - Windows 10 1903+ / Windows 11 x64，.NET Framework 4.8。
           - 可选安装 ViGEmBus；已有驱动会跳过，卸载保留个人配置与共享驱动。

@@ -60,6 +60,17 @@ Automatic update checks are **on by default** and can be disabled in About. Your
 
 Closing the window minimizes to tray. Launching again activates the existing instance. Data lives in `%LOCALAPPDATA%/PadHop` and survives uninstall. Use Share current profile when sharing with others; a full backup includes local application paths. Logs may contain paths and device identifiers: review before sharing.
 
+## Xbox output and window switching
+
+**Enable virtual Xbox controller** belongs to each global/app profile. **Keep Xbox controller connected when switching windows**, below Enable input on the status page, is a global setting. It defaults to off and saves automatically.
+
+- Switching between apps that both need Xbox output reuses one virtual controller, clears held input and loads the foreground mapping.
+- With keep-connected off, entering an excluded app or a profile without Xbox output disconnects the device. Returning reconnects it and may play Windows device sounds.
+- With keep-connected on, the device remains after its first creation, with neutral input outside active apps. Other apps can still detect it or assign it a player slot. Pausing or exiting removes it.
+- Avoid competing Steam Input and Talaria mappings. Leave keep-connected off when alternating between them if the idle device causes trouble. Exclude the game executable itself; excluding Steam does not exclude all Steam games.
+
+See the [FAQ](docs/faq.en.md) for troubleshooting. Questions and improvements are welcome through Issues and PRs.
+
 ## Recording components and logs
 
 Ordinary mappings and presets do not need recording components. For Bluetooth haptic recording, open the recording section under **Controller settings → Haptic feedback**:

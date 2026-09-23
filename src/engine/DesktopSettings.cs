@@ -11,7 +11,7 @@ internal sealed class DesktopSettings
     internal string AppProfiles;internal readonly List<string> ProfileTargets=new List<string>();internal string PadProfiles; internal string DevicePath="";
     internal double DragThresholdPx=0;
     internal double Speed = 0.02, SmoothMs = 12, Friction = 8, ScrollUnits = 2000;
-    internal bool Inertia = true, Global, SteamDesktopMuted;
+    internal bool Inertia = true, Global, SteamDesktopMuted, KeepVirtualConnected;
     internal bool PressureClick;internal bool HardwarePadClick=false;
     internal bool RightHaptics=true, MotionHaptics=false, LeftScroll=false;
     internal double HapticGain=-12;
@@ -48,6 +48,7 @@ internal sealed class DesktopSettings
                 case "friction": s.Friction = Number(v, 1, 30); break;
                 case "scrollUnits": s.ScrollUnits = Number(v, 200, 20000); break;
                 case "inertia": s.Inertia = bool.Parse(v); break;
+                case "keepVirtualConnected": s.KeepVirtualConnected=bool.Parse(v);break;
                 case "global": s.Global = bool.Parse(v); break;
                 case "steamDesktopMuted": s.SteamDesktopMuted = bool.Parse(v); break;
                 case "allow": s.Allow.Add(Absolute(v)); break;

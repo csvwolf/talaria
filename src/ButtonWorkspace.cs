@@ -6,9 +6,16 @@ using System.Windows.Controls;
 using System.Windows.Media;
 internal sealed partial class PadHop {
  readonly Dictionary<string,Button> bindingRows=new Dictionary<string,Button>();TextBlock outputSummary;CheckBox virtualOutputBox;bool loadingOutput;
+ void BuildConnectionSettings(){
+  var card=Get<StackPanel>("ConnectionOptions");string value;bool enabled=values.TryGetValue("keepVirtualConnected",out value) && string.Equals(value,"true",StringComparison.OrdinalIgnoreCase);
+  var toggle=new CheckBox{Content=L.T("切换窗口时保持 Xbox 手柄连接"),IsChecked=enabled};card.Children.Add(toggle);
+  Hint(card,L.T("全局设置，默认关闭。开启可减少切窗拔插提示音；不接管时不输出操作，但其他应用仍能检测到 Xbox 手柄。暂停接管或退出时断开。"));
+  RoutedEventHandler change=delegate{Guard(delegate{values["keepVirtualConnected"]=(toggle.IsChecked==true).ToString();SaveRules();Notice(L.T("虚拟手柄连接设置已保存；适用于所有应用，试用期间的更改在结束试用后生效。"));});};toggle.Checked+=change;toggle.Unchecked+=change;
+ }
  void BuildButtons(){var page=Get<StackPanel>("TouchPage");var card=Card(page,L.T("按位置设置按键"));var box=(UIElement)card.Parent;page.Children.Remove(box);page.Children.Insert(1,box);
  Hint(card,L.T("L 是左手，R 是右手。点一下按键卡片，直接编辑动作。"));
- virtualOutputBox=new CheckBox{Content=L.T("启用虚拟 Xbox 手柄（供游戏识别）")};card.Children.Add(virtualOutputBox);virtualOutputBox.Checked+=delegate{if(!loadingOutput){padBook.VirtualOutputEnabled=true;SyncButtons();UpdateFullStatus();}};virtualOutputBox.Unchecked+=delegate{if(!loadingOutput){padBook.VirtualOutputEnabled=false;SyncButtons();UpdateFullStatus();}};outputSummary=Hint(card,"");
+ virtualOutputBox=new CheckBox{Content=L.T("启用虚拟 Xbox 手柄（供游戏识别）")};card.Children.Add(virtualOutputBox);virtualOutputBox.Checked+=delegate{if(!loadingOutput){padBook.VirtualOutputEnabled=true;SyncButtons();UpdateFullStatus();}};virtualOutputBox.Unchecked+=delegate{if(!loadingOutput){padBook.VirtualOutputEnabled=false;SyncButtons();UpdateFullStatus();}};
+ outputSummary=Hint(card,"");
  var tabs=new TabControl{Background=Brushes.Transparent,BorderThickness=new Thickness(0),Margin=new Thickness(0,6,0,0)};card.Children.Add(tabs);
  string[][] groups={new[]{"LB","RB","LT","RT","L3","R3"},new[]{"L4","R4","L5","R5","LG","RG"},new[]{"UP","Y","LEFT","X","RIGHT","B","DOWN","A","VIEW","MENU","QAM"}};
  string[] names={L.T("肩键、扳机与摇杆"),L.T("背面 · 背键与握把"),L.T("正面 · 方向与按钮")};for(int i=0;i<groups.Length;i++){var panel=new StackPanel{Margin=new Thickness(0,10,0,0)};tabs.Items.Add(new TabItem{Header=names[i],Content=panel});var heading=new Grid();heading.ColumnDefinitions.Add(new ColumnDefinition());heading.ColumnDefinitions.Add(new ColumnDefinition());for(int side=0;side<2;side++){var t=new TextBlock{Text=i<2?(side==0?L.T("左手侧"):L.T("右手侧")):(side==0?L.T("方向与视图"):L.T("正面与菜单")),Foreground=Brushes.LightBlue,Margin=new Thickness(8,4,8,8)};heading.Children.Add(t);Grid.SetColumn(t,side);}panel.Children.Add(heading);var grid=new Grid();grid.ColumnDefinitions.Add(new ColumnDefinition());grid.ColumnDefinitions.Add(new ColumnDefinition());panel.Children.Add(grid);for(int j=0;j<groups[i].Length;j++){if(j%2==0)grid.RowDefinitions.Add(new RowDefinition{Height=GridLength.Auto});string input=groups[i][j];var button=new Button{HorizontalContentAlignment=HorizontalAlignment.Stretch,Padding=new Thickness(14,10,14,10),Margin=new Thickness(0,0,j%2==0?8:0,8)};grid.Children.Add(button);Grid.SetRow(button,j/2);Grid.SetColumn(button,j%2);bindingRows[input]=button;button.Click+=delegate{EditBinding(input);};}}BuildStickEditor(tabs);tabs.SelectedIndex=1;SyncButtons();
