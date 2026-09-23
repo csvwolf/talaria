@@ -60,6 +60,18 @@ Automatic update checks are **on by default** and can be disabled in About. Your
 
 Closing the window minimizes to tray. Launching again activates the existing instance. Data lives in `%LOCALAPPDATA%/PadHop` and survives uninstall. Use Share current profile when sharing with others; a full backup includes local application paths. Logs may contain paths and device identifiers: review before sharing.
 
+## Avoid Steam desktop layout conflicts
+
+When Steam's desktop layout and Talaria are both active, **a single click may become a double-click**, scrolling may be too fast, or haptics may overlap. For example, binding the same button or trackpad press to left-click in both apps can send two clicks from one press; avoid these binding conflicts. **Enabling Talaria does not disable Steam's desktop layout. Inclusion mode only limits Talaria; it does not block Steam output.**
+
+Choose a setup for your use case:
+
+- **Non-Steam games:** exit Steam and enable Talaria. Enable Xbox output in the profile if the game needs controller input.
+- **Steam game + administrator-level trainer:** keep Steam unelevated, enable Talaria's administrator-window control capability (UIAccess), and include only the trainer executable in Talaria's inclusion list. Steam Input handles the game; Talaria handles the trainer. Windows integrity restrictions prevent ordinary Steam keyboard/mouse injection from controlling that elevated window. The trainer profile does not need Xbox output. Haptics may still overlap; see the FAQ.
+- **Talaria handles the ordinary desktop:** back up Steam's desktop layout, then use an empty layout or remove overlapping button, trackpad and haptic bindings. Keep game and Big Picture layouts; do not disable Steam Input globally. Pausing Talaria does not automatically restore the cleared desktop layout.
+
+See [FAQ: Steam desktop layout conflicts](docs/faq.en.md#steam-desktop-conflicts) for setup, inclusion-mode limits, and the relationship between exclusive access and device sounds.
+
 ## Xbox output and window switching
 
 **Enable virtual Xbox controller** belongs to each global/app profile. **Keep Xbox controller connected when switching windows**, below Enable input on the status page, is a global setting. It defaults to on and saves automatically; an explicitly saved off preference is preserved.
